@@ -8,104 +8,119 @@
   <script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, sans-serif; -webkit-tap-highlight-color: transparent; }
-    body {
+    
+    /* Khóa tuyệt đối cuộn trang và giật nảy trên Mobile */
+    html, body {
+      width: 100%;
+      height: 100%;
+      height: 100dvh;
+      overflow: hidden;
+      overscroll-behavior: none;
+      position: fixed;
+      top: 0; left: 0;
       background: #0b0e14;
       color: #fff;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: flex-start;
-      min-height: 100vh;
-      min-height: 100dvh;
-      padding: 6px;
-      padding-bottom: calc(8px + env(safe-area-inset-bottom));
       user-select: none;
+      -webkit-user-select: none;
       touch-action: manipulation;
-      overflow-x: hidden;
     }
 
-    .header-bar {
+    /* Khung ứng dụng chính co giãn theo đúng 100dvh */
+    .app-container {
       width: 100%;
       max-width: 500px;
+      height: 100%;
+      height: 100dvh;
+      margin: 0 auto;
+      padding: 4px 6px;
+      padding-bottom: max(6px, env(safe-area-inset-bottom));
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      box-sizing: border-box;
+    }
+
+    /* 1. Thanh tiêu đề trên cùng */
+    .header-bar {
+      height: 24px;
+      flex-shrink: 0;
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 4px;
+      padding: 0 2px;
     }
     .btn-back { color: #00d2d3; text-decoration: none; font-weight: bold; font-size: 13px; }
     .badge-info { background: #1f242d; border: 1px solid #30363d; padding: 2px 8px; border-radius: 12px; font-size: 11px; font-weight: bold; color: #feca57; }
-    .race-info { font-size: 13px; color: #00d2d3; font-weight: bold; }
+    .race-info { font-size: 12px; color: #00d2d3; font-weight: bold; }
 
-    .game-wrapper {
-      position: relative;
-      width: 100%;
-      max-width: 500px;
-      display: flex;
-      gap: 6px;
-    }
-
-    /* Thanh cự ly bên trái (Desktop) */
+    /* 2. Thanh đo cự ly tiến trình đua */
     .track-sidebar {
-      width: 42px;
+      height: 24px;
+      flex-shrink: 0;
       background: #141922;
       border: 1px solid #30363d;
-      border-radius: 8px;
-      position: relative;
+      border-radius: 6px;
       display: flex;
-      flex-direction: column;
+      flex-direction: row;
+      justify-content: space-between;
       align-items: center;
-      padding: 6px 0;
+      padding: 0 10px;
+      margin: 2px 0;
     }
-    .finish-icon { font-size: 16px; }
     .progress-rail {
       position: relative;
-      width: 6px;
-      height: 520px;
+      width: 80%;
+      height: 6px;
       background: #21262d;
       border-radius: 3px;
-      margin-top: 4px;
     }
     .runner-marker {
       position: absolute;
-      left: 50%;
-      transform: translate(-50%, 50%);
-      font-size: 15px;
-      transition: bottom 0.1s linear, left 0.1s linear;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 14px;
+      transition: left 0.1s linear, bottom 0.1s linear;
     }
     .marker-p1 { filter: drop-shadow(0 0 5px #00d2d3); z-index: 3; }
     .marker-p2 { filter: drop-shadow(0 0 5px #ff6b6b); z-index: 2; }
     .marker-p3 { filter: drop-shadow(0 0 5px #feca57); z-index: 2; }
 
-    /* Canvas Container */
-    .canvas-container {
-      position: relative;
+    /* 3. Khu vực Canvas: Tự động co giãn theo khoảng trống còn lại */
+    .canvas-wrapper {
       flex: 1;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-    }
-    #raceCanvas {
+      min-height: 0; /* Cho phép co nhỏ không bị tràn */
       width: 100%;
-      max-width: 480px;
-      height: auto;
+      position: relative;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      overflow: hidden;
+    }
+
+    #raceCanvas {
+      max-height: 100%;
+      max-width: 100%;
+      width: auto;
+      height: 100%;
       aspect-ratio: 500 / 680;
+      object-fit: contain;
       background: #090d13;
-      border-radius: 10px;
+      border-radius: 8px;
       border: 2px solid #30363d;
       display: block;
-      box-shadow: 0 8px 25px rgba(0,0,0,0.85);
+      box-shadow: 0 6px 20px rgba(0,0,0,0.8);
       touch-action: none;
     }
 
-    /* HUD Vận tốc */
+    /* HUD Vận tốc góc Canvas */
     .speed-gauge-box {
       position: absolute;
-      top: 8px;
+      top: 6px;
       right: 8px;
       background: rgba(13, 17, 23, 0.88);
       border: 1px solid rgba(255,255,255,0.2);
-      padding: 3px 8px;
-      border-radius: 20px;
+      padding: 2px 7px;
+      border-radius: 15px;
       display: flex;
       align-items: center;
       gap: 5px;
@@ -113,8 +128,8 @@
       z-index: 5;
     }
     .speed-bar-bg {
-      width: 50px;
-      height: 6px;
+      width: 45px;
+      height: 5px;
       background: #21262d;
       border-radius: 3px;
       overflow: hidden;
@@ -131,35 +146,39 @@
     }
     .speed-bar-fill.slowed { background: #7f8c8d; }
 
-    /* Khung câu hỏi (Mặc định cho Desktop: phủ phía trên) */
-    .quiz-overlay-strip {
-      position: absolute;
-      top: 6px;
-      left: 6px;
-      right: 6px;
-      background: rgba(13, 17, 23, 0.96);
-      border: 2px solid #00d2d3;
+    /* 4. Khung câu hỏi trắc nghiệm cố định chân màn hình (Không làm giật Canvas) */
+    .quiz-dock {
+      flex-shrink: 0;
+      width: 100%;
+      height: 108px;
+      background: rgba(18, 23, 31, 0.98);
+      border: 1.5px solid #00d2d3;
       border-radius: 8px;
-      padding: 6px 10px;
-      display: none;
+      padding: 5px 8px;
+      display: flex;
       flex-direction: column;
-      gap: 4px;
-      box-shadow: 0 4px 20px rgba(0,210,211,0.35);
-      z-index: 20;
+      justify-content: space-between;
+      box-shadow: 0 4px 15px rgba(0,210,211,0.25);
+      margin-top: 3px;
+      z-index: 10;
     }
+
     .quiz-top-info {
       display: flex;
       justify-content: space-between;
       align-items: center;
+      height: 20px;
     }
-    .quiz-prompt { font-size: 17px; font-weight: bold; color: #00d2d3; }
+    .quiz-prompt { font-size: 16px; font-weight: bold; color: #00d2d3; }
     .quiz-pinyin { font-size: 12px; color: #feca57; margin-left: 6px; }
+
     .quiz-timer-bar-bg {
       width: 100%;
       height: 3px;
-      background: #333;
+      background: #21262d;
       border-radius: 2px;
       overflow: hidden;
+      margin: 2px 0;
     }
     .quiz-timer-bar-fill {
       width: 100%;
@@ -167,109 +186,66 @@
       background: #ff6b6b;
       transition: width 0.1s linear;
     }
+
     .quiz-btn-grid {
       display: grid;
-      grid-template-columns: repeat(4, 1fr);
+      grid-template-columns: 1fr 1fr;
       gap: 5px;
-      margin-top: 2px;
+      height: 72px;
     }
     .quiz-opt-btn {
       background: #21262d;
       color: #fff;
       border: 1px solid #30363d;
-      padding: 6px 2px;
-      border-radius: 5px;
+      border-radius: 6px;
       cursor: pointer;
-      font-size: 12px;
-      font-weight: 500;
+      font-size: 13px;
+      font-weight: 600;
+      padding: 0 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
     }
     .quiz-opt-btn:active { background: #00d2d3; color: #111; }
 
-    .controls-hint {
-      margin-top: 5px;
+    /* Trạng thái chờ khi chưa có câu hỏi */
+    .quiz-idle-msg {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100%;
       color: #8b949e;
-      font-size: 11px;
+      font-size: 12px;
       text-align: center;
-      width: 100%;
-      max-width: 500px;
+      line-height: 1.4;
     }
-    .kbd { background: #21262d; color: #00d2d3; padding: 1px 5px; border-radius: 4px; font-weight: bold; border: 1px solid #30363d; }
 
-    /* =========================================================
-       TỐI ƯU GIAO DIỆN HOÀN TOÀN VỪA MÀN HÌNH ĐIỆN THOẠI
-       ========================================================= */
-    @media (max-width: 600px), (pointer: coarse) {
-      body {
-        padding: 4px;
-        padding-bottom: calc(6px + env(safe-area-inset-bottom));
-      }
-      .header-bar {
-        margin-bottom: 3px;
-      }
-      .game-wrapper {
-        flex-direction: column;
-        align-items: center;
-        gap: 3px;
-      }
-      /* Thanh tiến trình cự ly nằm ngang ở trên */
-      .track-sidebar {
-        width: 100%;
-        max-width: 460px;
-        height: 28px;
-        flex-direction: row;
-        justify-content: space-between;
-        padding: 0 10px;
-      }
-      .progress-rail {
-        width: 78%;
-        height: 5px;
-        margin-top: 0;
-      }
-      .runner-marker {
-        top: 50%;
-        bottom: auto !important;
-        transform: translate(-50%, -50%);
-        font-size: 13px;
-      }
+    /* Hướng dẫn phím */
+    .controls-hint {
+      height: 14px;
+      flex-shrink: 0;
+      color: #6e7681;
+      font-size: 10px;
+      text-align: center;
+      margin-top: 2px;
+    }
+    .kbd { background: #21262d; color: #00d2d3; padding: 1px 4px; border-radius: 3px; font-weight: bold; }
 
-      /* KHẮC PHỤC LỖI: Giới hạn chiều cao Canvas để không lấn át màn hình */
-      #raceCanvas {
-        max-height: 48vh;
-        width: auto;
-        max-width: 100%;
-        aspect-ratio: 500 / 680;
-        margin: 0 auto;
+    /* Giao diện Desktop (> 650px): Chuyển thành bố cục ngang */
+    @media (min-width: 650px) {
+      .app-container {
+        max-width: 580px;
+        height: 100vh;
       }
-
-      /* Ô câu hỏi hiển thị gọn gàng bên dưới màn Canvas */
-      .quiz-overlay-strip {
-        position: static !important;
-        margin-top: 5px;
-        width: 100%;
-        max-width: 460px;
-        padding: 6px 8px;
-        gap: 3px;
-        box-sizing: border-box;
+      .quiz-dock {
+        height: 100px;
       }
-      .quiz-prompt { font-size: 15px; }
-      .quiz-pinyin { font-size: 11px; }
       .quiz-btn-grid {
-        grid-template-columns: 1fr 1fr;
-        gap: 6px;
-        margin-top: 3px;
-      }
-      .quiz-opt-btn {
-        padding: 9px 4px;
-        font-size: 13px;
-        font-weight: 600;
-        min-height: 38px;
-      }
-      .controls-hint {
-        margin-top: 3px;
-        font-size: 10px;
+        grid-template-columns: repeat(4, 1fr);
+        height: 48px;
       }
     }
 
@@ -278,7 +254,7 @@
       display: flex;
       position: fixed;
       top: 0; left: 0; width: 100%; height: 100%;
-      background: rgba(13, 17, 23, 0.94);
+      background: rgba(11, 14, 20, 0.95);
       justify-content: center;
       align-items: center;
       z-index: 100;
@@ -290,7 +266,7 @@
       border-radius: 12px;
       padding: 16px;
       text-align: center;
-      max-width: 440px;
+      max-width: 420px;
       width: 100%;
       box-shadow: 0 10px 30px rgba(0,0,0,0.9);
     }
@@ -355,58 +331,64 @@
 </head>
 <body>
 
-  <div class="header-bar">
-    <a href="../index.html" class="btn-back">← Về Hub</a>
-    <div class="badge-info" id="badgeSettings">Vàng • 3000m</div>
-    <div class="race-info">Đích: <span id="distDisplay">0</span> / <span id="maxDistDisplay">3000</span>m</div>
-  </div>
+  <div class="app-container">
+    <!-- 1. Header -->
+    <div class="header-bar">
+      <a href="../index.html" class="btn-back">← Về Hub</a>
+      <div class="badge-info" id="badgeSettings">Vàng • 3000m</div>
+      <div class="race-info">Đích: <span id="distDisplay">0</span> / <span id="maxDistDisplay">3000</span>m</div>
+    </div>
 
-  <div class="game-wrapper">
-    <!-- Cột cự ly bên trái (hoặc thanh ngang trên Mobile) -->
+    <!-- 2. Thanh cự ly -->
     <div class="track-sidebar">
-      <div style="font-size:14px;">🚩</div>
+      <div style="font-size:13px;">🚩</div>
       <div class="progress-rail" id="progressRail">
         <div class="runner-marker marker-p1" id="markerP1">🏇</div>
         <div class="runner-marker marker-p2" id="markerP2">🐴</div>
         <div class="runner-marker marker-p3" id="markerP3">🦄</div>
       </div>
-      <div class="finish-icon">🏁</div>
+      <div style="font-size:13px;">🏁</div>
     </div>
 
-    <!-- Canvas đường đua & khung câu hỏi -->
-    <div class="canvas-container">
+    <!-- 3. Khu vực Canvas hiển thị đua 3D -->
+    <div class="canvas-wrapper">
       <canvas id="raceCanvas" width="500" height="680"></canvas>
 
-      <!-- HUD Vận tốc -->
       <div class="speed-gauge-box">
         <span>⚡</span>
         <div class="speed-bar-bg">
           <div class="speed-bar-fill" id="speedBarFill"></div>
         </div>
-        <span id="speedVal" style="font-weight:bold; min-width:38px;">55 km/h</span>
+        <span id="speedVal" style="font-weight:bold; min-width:36px;">55 km/h</span>
       </div>
+    </div>
 
-      <!-- Khung trắc nghiệm: PC phủ phía trên, Mobile nằm ngay dưới Canvas -->
-      <div class="quiz-overlay-strip" id="quizStrip">
+    <!-- 4. Khung câu hỏi cố định chân màn hình (Luôn vừa vặn tầm ngón tay cái) -->
+    <div class="quiz-dock" id="quizDock">
+      <div id="quizContent" style="display: none; height: 100%; flex-direction: column; justify-content: space-between;">
         <div class="quiz-top-info">
           <div>
             <span class="quiz-prompt" id="quizHanzi">你好</span>
             <span class="quiz-pinyin" id="quizPinyin">(nǐ hǎo)</span>
           </div>
-          <span style="font-size:10px; color:#feca57;">🚀 Chọn đúng: Bứt tốc 115 km/h!</span>
+          <span style="font-size:10px; color:#feca57;">🚀 Chọn đúng để Bứt Tốc 115 km/h!</span>
         </div>
         <div class="quiz-timer-bar-bg">
           <div class="quiz-timer-bar-fill" id="quizTimerBar"></div>
         </div>
         <div class="quiz-btn-grid" id="quizOptions"></div>
       </div>
-    </div>
-  </div>
 
-  <!-- Hướng dẫn điều khiển -->
-  <div class="controls-hint" id="controlsHint">
-    🎮 <b>Máy tính:</b> Phím <span class="kbd">A</span> / <span class="kbd">D</span> hoặc <span class="kbd">←</span> <span class="kbd">→</span> &nbsp;|&nbsp;
-    📱 <b>Điện thoại:</b> <b>Vuốt ngón tay Trái / Phải</b> trên đường đua để chuyển làn!
+      <!-- Trạng thái lúc bình thường không có câu hỏi -->
+      <div class="quiz-idle-msg" id="quizIdleMsg">
+        🐎 <b>Đang đua tốc độ!</b><br>Vuốt Trái/Phải để né rào. Câu hỏi bứt tốc sẽ xuất hiện tại đây...
+      </div>
+    </div>
+
+    <!-- 5. Hướng dẫn điều khiển -->
+    <div class="controls-hint">
+      🎮 <b>PC:</b> Phím <span class="kbd">A</span> / <span class="kbd">D</span> &nbsp;|&nbsp; 📱 <b>Điện thoại:</b> <b>Vuốt ngón tay Trái / Phải</b> trên màn hình
+    </div>
   </div>
 
   <!-- 1. MODAL CHỌN CHẾ ĐỘ -->
@@ -512,16 +494,16 @@
     const ctx = canvas.getContext('2d');
 
     // =================================================================
-    // HỆ THỐNG PHỐI CẢNH 3D: ĐỒNG BỘ ĐƯỜNG ĐUA & 3 LÀN CHUẨN XÁC
+    // HỆ THỐNG PHỐI CẢNH 3D: ĐỒNG BỘ ĐƯỜNG ĐUA & 3 LÀN
     // =================================================================
     const HORIZON_Y = 185;
     const BOTTOM_Y = 600;
     const Z_MIN = 50;
     const Z_MAX = 900;
     const D_VIEW = 110;
-    const CENTER_X = canvas.width / 2; // 250px
+    const CENTER_X = canvas.width / 2;
 
-    const TOTAL_ROAD_WIDTH = 400; // Mỗi làn có độ rộng đúng 400 / 3 = 133.3px
+    const TOTAL_ROAD_WIDTH = 400;
     const LANE_SPACING = TOTAL_ROAD_WIDTH / 3;
 
     function project3D(xw, z) {
@@ -571,7 +553,7 @@
         }
       }).catch(() => {});
 
-    // 3 KỴ SĨ (Lane -1: Trái, 0: Giữa, 1: Phải)
+    // 3 KỴ SĨ
     let racer1 = {
       name: "Bạn (P1)", icon: "🏇", color: "#0984e3",
       lane: 0, visualLane: 0, speed: 55, baseSpeed: 55,
@@ -804,7 +786,7 @@
       }
     }
 
-    // ---------------- ĐIỀU KHIỂN & VUỐT CẢM ỨNG ----------------
+    // ---------------- ĐIỀU KHIỂN & VUỐT TOUCH ----------------
     function getLocalRacer() {
       return racer1.isLocal ? racer1 : racer2;
     }
@@ -818,15 +800,16 @@
 
     let touchStartX = 0;
     let touchStartY = 0;
-    canvas.addEventListener('touchstart', e => {
+    window.addEventListener('touchstart', e => {
       touchStartX = e.changedTouches[0].clientX;
       touchStartY = e.changedTouches[0].clientY;
     }, { passive: true });
 
-    canvas.addEventListener('touchend', e => {
+    window.addEventListener('touchend', e => {
       if (!gameStarted || gameEnded) return;
       const diffX = e.changedTouches[0].clientX - touchStartX;
       const diffY = e.changedTouches[0].clientY - touchStartY;
+      // Vuốt tối thiểu 25px
       if (Math.abs(diffX) > Math.abs(diffY) && Math.abs(diffX) > 25) {
         if (diffX < 0) steerLeft();
         else steerRight();
@@ -867,7 +850,8 @@
         grid.appendChild(btn);
       });
 
-      document.getElementById('quizStrip').style.display = 'flex';
+      document.getElementById('quizIdleMsg').style.display = 'none';
+      document.getElementById('quizContent').style.display = 'flex';
     }
 
     function handleAnswer(isCorrect) {
@@ -885,7 +869,8 @@
 
     function closeQuiz() {
       quizActive = false;
-      document.getElementById('quizStrip').style.display = 'none';
+      document.getElementById('quizContent').style.display = 'none';
+      document.getElementById('quizIdleMsg').style.display = 'flex';
     }
 
     // ---------------- AI NPC ----------------
@@ -1021,15 +1006,9 @@
       const m2 = document.getElementById('markerP2');
       const m3 = document.getElementById('markerP3');
 
-      if (window.innerWidth <= 600) {
-        m1.style.left = `${p1Pct}%`;
-        if (racer2.active) m2.style.left = `${p2Pct}%`;
-        if (racer3.active) m3.style.left = `${p3Pct}%`;
-      } else {
-        m1.style.bottom = `${p1Pct}%`;
-        if (racer2.active) m2.style.bottom = `${p2Pct}%`;
-        if (racer3.active) m3.style.bottom = `${p3Pct}%`;
-      }
+      m1.style.left = `${p1Pct}%`;
+      if (racer2.active) m2.style.left = `${p2Pct}%`;
+      if (racer3.active) m3.style.left = `${p3Pct}%`;
 
       const reachedFinish = [racer1.distance >= TOTAL_RACE_DIST];
       if (racer2.active && racer2.distance >= TOTAL_RACE_DIST) reachedFinish.push(true);
@@ -1047,14 +1026,13 @@
     function draw() {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-      // 1. Bầu trời đêm & Dãy núi
+      // 1. Bầu trời đêm & Núi
       const skyGrad = ctx.createLinearGradient(0, 0, 0, HORIZON_Y);
       skyGrad.addColorStop(0, "#080c14");
       skyGrad.addColorStop(1, "#172334");
       ctx.fillStyle = skyGrad;
       ctx.fillRect(0, 0, canvas.width, HORIZON_Y);
 
-      // Núi xa
       ctx.fillStyle = "#0f1722";
       ctx.beginPath();
       ctx.moveTo(0, HORIZON_Y);
@@ -1066,7 +1044,7 @@
       ctx.lineTo(500, HORIZON_Y);
       ctx.fill();
 
-      // Thảm cỏ rừng xanh
+      // Thảm cỏ rừng
       ctx.fillStyle = "#163a24";
       ctx.fillRect(0, HORIZON_Y, canvas.width, canvas.height - HORIZON_Y);
 
@@ -1140,7 +1118,6 @@
       // 4. Danh sách vẽ Z-Sorting
       let renderList = [];
 
-      // Hàng cây 2 bên
       const TREE_GAP = 75;
       const forestOffset = (localPlayer.distance * 12) % TREE_GAP;
 
@@ -1153,7 +1130,7 @@
         renderList.push({ type: 'tree', xw:  390, z: z - 50, variant: 2 });
       }
 
-      // Rào cản gỗ
+      // Rào cản
       obstacles.forEach(obs => {
         if (!obs.smashed) {
           const distDiff = obs.dist - localPlayer.distance;
@@ -1164,7 +1141,7 @@
         }
       });
 
-      // Kỵ sĩ khác
+      // Đối thủ khác
       [racer1, racer2, racer3].forEach(r => {
         if (r !== localPlayer && r.active) {
           const distDiff = r.distance - localPlayer.distance;
@@ -1323,7 +1300,7 @@
     }
     requestAnimationFrame(loop);
 
-    // ---------------- TỔNG KẾT VÒNG ĐUA ----------------
+    // ---------------- TỔNG KẾT ----------------
     function finishRace() {
       gameEnded = true;
       closeQuiz();
