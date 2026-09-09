@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Đại Hội Câu Cá 2D</title>
+  <title>Đại Hội Câu Cá 2D - Chọn Rank Đối Thủ</title>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, sans-serif; }
     body {
@@ -27,9 +27,10 @@
       margin-bottom: 8px;
     }
     .btn-back { color: #00d2d3; text-decoration: none; font-weight: bold; font-size: 14px; }
+    .rank-badge { background: #34495e; border: 1px solid #feca57; color: #feca57; padding: 4px 12px; border-radius: 15px; font-size: 13px; font-weight: bold; }
     .timer { background: #e74c3c; padding: 4px 14px; border-radius: 15px; font-weight: bold; font-size: 15px; }
 
-    /* Bảng điểm số */
+    /* Bảng tỉ số */
     .scoreboard {
       display: flex;
       gap: 15px;
@@ -51,7 +52,7 @@
       display: block;
     }
 
-    /* Bảng hướng dẫn & cụm nút điều khiển ảo */
+    /* Hướng dẫn & nút ảo */
     .controls-guide {
       margin-top: 8px;
       color: #aaa;
@@ -74,13 +75,13 @@
     }
     .v-btn:active { background: #00d2d3; color: #121212; }
 
-    /* Modal câu hỏi trắc nghiệm */
+    /* Modal chung */
     .modal-overlay {
       display: none;
       position: fixed;
       top: 0; left: 0; width: 100%; height: 100%;
-      background: rgba(0, 0, 0, 0.75);
-      backdrop-filter: blur(3px);
+      background: rgba(0, 0, 0, 0.85);
+      backdrop-filter: blur(4px);
       justify-content: center;
       align-items: center;
       z-index: 100;
@@ -90,7 +91,7 @@
       border: 2px solid #00d2d3;
       border-radius: 12px;
       width: 90%;
-      max-width: 440px;
+      max-width: 460px;
       padding: 22px;
       text-align: center;
       box-shadow: 0 10px 30px rgba(0,0,0,0.8);
@@ -103,18 +104,31 @@
       padding: 10px; border-radius: 6px; cursor: pointer; font-size: 14px;
     }
     .opt-btn:hover { background: #485460; }
-    .opt-btn.correct { background: #2ecc71 !important; border-color: #27ae60; }
-    .opt-btn.wrong { background: #e74c3c !important; border-color: #c0392b; }
-    .btn-close {
-      background: #e74c3c; color: white; border: none; padding: 8px 20px;
-      border-radius: 6px; font-weight: bold; cursor: pointer;
+    .opt-btn.correct { background: #2ecc71 !important; }
+    .opt-btn.wrong { background: #e74c3c !important; }
+
+    /* Nút chọn Rank */
+    .rank-list { display: flex; flex-direction: column; gap: 12px; margin: 20px 0; }
+    .rank-option-btn {
+      background: #2d3436;
+      border: 2px solid #555;
+      padding: 12px 16px;
+      border-radius: 8px;
+      color: #fff;
+      cursor: pointer;
+      text-align: left;
+      transition: 0.2s;
     }
+    .rank-option-btn:hover { border-color: #00d2d3; background: #3d4a54; }
+    .rank-name { font-size: 16px; font-weight: bold; display: flex; align-items: center; gap: 8px; }
+    .rank-desc { font-size: 12px; color: #aaa; margin-top: 4px; }
   </style>
 </head>
 <body>
 
   <div class="top-bar">
     <a href="../index.html" class="btn-back">← Về Hub</a>
+    <div class="rank-badge" id="currentRankDisplay">Rank: Chưa chọn</div>
     <div class="timer">⏳ Thời gian: <span id="timeVal">50</span>s</div>
   </div>
 
@@ -127,25 +141,53 @@
   <canvas id="gameCanvas" width="800" height="420"></canvas>
 
   <div class="controls-guide">
-    🎮 <b>Cách chơi:</b> Dùng phím <b>WASD</b> hoặc <b>Mũi tên</b> để chạy tự do. Nhấn <b>SPACE (Phím Cách)</b> hoặc <b>E</b> để tương tác.
+    🎮 <b>Cách chơi:</b> Dùng <b>WASD</b> hoặc <b>Phím Mũi Tên</b> để chạy. Nhấn <b>SPACE (Phím Cách)</b> để mua mồi / thả cần.
   </div>
 
   <div class="virtual-keys">
     <button class="v-btn" onclick="simulateInteract()">⚡ Phím Cách (Mua Mồi / Câu Cá)</button>
   </div>
 
-  <!-- POPUP TRẮC NGHIỆM ĐỔI MỒI -->
+  <!-- 1. POPUP CHỌN RANK ĐỐI THỦ -->
+  <div class="modal-overlay" id="rankModal" style="display: flex;">
+    <div class="quiz-card" style="border-color:#feca57;">
+      <h2 style="color:#feca57; margin-bottom: 5px;">CHỌN RANK ĐỐI THỦ</h2>
+      <p style="color:#bbb; font-size:13px;">Thiết lập trình độ câu cá của A Cường & Tiểu Hồ</p>
+
+      <div class="rank-list">
+        <!-- Rank Đồng -->
+        <button class="rank-option-btn" onclick="selectRank('BRONZE')">
+          <div class="rank-name" style="color:#cd7f32;">🥉 Rank Đồng (Tập Sự - Dễ)</div>
+          <div class="rank-desc">NPC giải đố chậm, đi lững thững, hay giật hụt cá (cá trốn 60%).</div>
+        </button>
+
+        <!-- Rank Vàng -->
+        <button class="rank-option-btn" onclick="selectRank('GOLD')">
+          <div class="rank-name" style="color:#f1c40f;">🥈 Rank Vàng (Bán Chuyên - Vừa)</div>
+          <div class="rank-desc">NPC thao tác đều tay, tỷ lệ câu dính cá 55%, thi đấu cân sức.</div>
+        </button>
+
+        <!-- Rank Thách Đấu -->
+        <button class="rank-option-btn" onclick="selectRank('CHALLENGER')">
+          <div class="rank-name" style="color:#e74c3c;">🥇 Rank Thách Đấu (Thần Cần - Cực Khó)</div>
+          <div class="rank-desc">Cấp độ OP cũ: NPC giải câu siêu tốc, chạy nhanh, giật cá bách phát bách trúng!</div>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2. POPUP TRẮC NGHIỆM ĐỔI MỒI -->
   <div class="modal-overlay" id="quizModal">
     <div class="quiz-card">
       <h3 style="color:#ff9f43;">Quầy Đổi Mồi: Trả lời đúng để nhận mồi!</h3>
       <div class="hanzi-box" id="targetHanzi">...</div>
       <div class="pinyin-box" id="targetPinyin">...</div>
       <div class="quiz-options" id="quizOptions"></div>
-      <button class="btn-close" onclick="closeQuizModal()">Rời quầy</button>
+      <button class="v-btn" style="border-color:#e74c3c; color:#e74c3c;" onclick="closeQuizModal()">Rời quầy</button>
     </div>
   </div>
 
-  <!-- POPUP KẾT THÚC -->
+  <!-- 3. POPUP KẾT THÚC -->
   <div class="modal-overlay" id="endModal">
     <div class="quiz-card" style="border-color:#feca57;">
       <h2 style="color:#feca57; margin-bottom:12px;" id="endTitle">KẾT THÚC GIẢI ĐẤU!</h2>
@@ -158,6 +200,37 @@
     const canvas = document.getElementById('gameCanvas');
     const ctx = canvas.getContext('2d');
 
+    // THÔNG SỐ CÂN BẰNG ĐỘ KHÓ CỦA NPC THEO RANK
+    const RANK_CONFIGS = {
+      BRONZE: {
+        title: "Rank: 🥉 Đồng (Dễ)",
+        npcSpeed: 1.2,
+        thinkTime: 160,       // NPC mất gần 3s mới trả lời xong câu hỏi
+        fishWaitTime: 140,    // Kéo cần lâu
+        catchRate: 0.4        // Chỉ 40% câu trúng cá
+      },
+      GOLD: {
+        title: "Rank: 🥈 Vàng (Vừa)",
+        npcSpeed: 1.7,
+        thinkTime: 95,        // NPC mất ~1.6s để giải đố
+        fishWaitTime: 110,
+        catchRate: 0.55       // 55% câu trúng cá
+      },
+      CHALLENGER: {
+        title: "Rank: 🥇 Thách Đấu (Khó)",
+        npcSpeed: 2.3,
+        thinkTime: 50,        // NPC giải đố siêu tốc
+        fishWaitTime: 85,
+        catchRate: 0.8        // 80% trúng cá (Bản OP)
+      }
+    };
+
+    let activeRank = RANK_CONFIGS.GOLD;
+    let gameStarted = false;
+    let gameEnded = false;
+    let timeLeft = 50;
+    let timerInterval = null;
+
     let words = [
       { id: 1, hanzi: "你好", pinyin: "nǐ hǎo", meaning: "Xin chào" },
       { id: 2, hanzi: "谢谢", pinyin: "xièxie", meaning: "Cảm ơn" },
@@ -166,8 +239,6 @@
       { id: 5, hanzi: "再见", pinyin: "zàijiàn", meaning: "Tạm biệt" }
     ];
 
-    let timeLeft = 50;
-    let gameEnded = false;
     let currentQ = null;
     let floatingTexts = [];
 
@@ -186,18 +257,16 @@
         }
       }).catch(() => {});
 
-    // VÙNG TỌA ĐỘ BẢN ĐỒ
     const SHOP_ZONE = { x: 30, y: 150, w: 140, h: 140 };
     const DOCK_X = 520;
 
-    // LỚP NHÂN VẬT CHUNG
     class Character {
       constructor(name, color, x, y, isNPC = false) {
         this.name = name;
         this.color = color;
         this.x = x;
         this.y = y;
-        this.speed = isNPC ? 1.8 : 3.2;
+        this.speed = isNPC ? 1.7 : 3.2;
         this.fish = 0;
         this.bait = 0;
         this.isNPC = isNPC;
@@ -207,7 +276,6 @@
         this.legSwing = 0;
         this.isFishing = false;
 
-        // Dành riêng cho máy trạng thái của NPC
         this.aiState = 'WALK_TO_SHOP';
         this.aiTimer = 0;
         this.targetX = 140;
@@ -215,8 +283,14 @@
         this.dockY = 180;
       }
 
-      update() {
+      applyRankSettings(config) {
         if (this.isNPC) {
+          this.speed = config.npcSpeed;
+        }
+      }
+
+      update() {
+        if (this.isNPC && gameStarted) {
           this.updateAI();
         }
 
@@ -229,15 +303,14 @@
       updateAI() {
         if (gameEnded) return;
 
-        // Máy trạng thái của NPC
         switch (this.aiState) {
           case 'WALK_TO_SHOP':
             this.moveToTarget(() => {
               this.aiState = 'BUYING';
-              this.aiTimer = 70; // Thời gian đứng suy nghĩ trả lời câu hỏi (~1.2s)
+              this.aiTimer = activeRank.thinkTime;
               const randomW = words[Math.floor(Math.random() * words.length)];
               this.bubble = `🤔 ${randomW.hanzi}?`;
-              this.bubbleTimer = 60;
+              this.bubbleTimer = this.aiTimer;
             });
             break;
 
@@ -246,20 +319,19 @@
             if (this.aiTimer <= 0) {
               this.bait++;
               this.bubble = "✔ +1 Mồi 🪱";
-              this.bubbleTimer = 50;
+              this.bubbleTimer = 40;
               floatingTexts.push({ text: "+1 Mồi 🪱", x: this.x, y: this.y - 25, life: 30, color: "#feca57" });
               updateUI();
 
-              // Nếu tích luỹ đủ 2 mồi thì đi ra hồ, ngược lại tiếp tục mua
               if (this.bait >= 2) {
                 this.aiState = 'WALK_TO_DOCK';
                 this.targetX = DOCK_X;
                 this.targetY = this.dockY;
               } else {
-                this.aiTimer = 70;
+                this.aiTimer = activeRank.thinkTime;
                 const randomW = words[Math.floor(Math.random() * words.length)];
                 this.bubble = `🤔 ${randomW.hanzi}?`;
-                this.bubbleTimer = 60;
+                this.bubbleTimer = this.aiTimer;
               }
             }
             break;
@@ -268,9 +340,9 @@
             this.moveToTarget(() => {
               this.aiState = 'FISHING';
               this.isFishing = true;
-              this.aiTimer = 110; // Thời gian câu cá (~1.8s)
+              this.aiTimer = activeRank.fishWaitTime;
               this.bubble = "Đang câu... 🎣";
-              this.bubbleTimer = 80;
+              this.bubbleTimer = 60;
             });
             break;
 
@@ -279,30 +351,28 @@
             if (this.aiTimer <= 0) {
               if (this.bait > 0) {
                 this.bait--;
-                if (Math.random() < 0.7) {
+                if (Math.random() < activeRank.catchRate) {
                   this.fish++;
                   this.bubble = "Dính cá! 🎉";
                   floatingTexts.push({ text: "+1 Cá 🐟", x: this.x + 25, y: this.y - 20, life: 40, color: "#00d2d3" });
                 } else {
                   this.bubble = "Trượt cá rồi 💨";
                 }
-                this.bubbleTimer = 60;
+                this.bubbleTimer = 50;
                 updateUI();
               }
 
-              // Nếu hết mồi thì quay về quầy mồi
               if (this.bait <= 0) {
                 this.isFishing = false;
                 this.aiState = 'WALK_TO_SHOP';
                 this.targetX = 140 + (Math.random() * 20 - 10);
                 this.targetY = 190 + (this.name === "A Cường" ? 25 : -25);
-                this.bubble = "Hết mồi rồi! Về quầy 🏃";
-                this.bubbleTimer = 60;
+                this.bubble = "Hết mồi rồi! 🏃";
+                this.bubbleTimer = 50;
               } else {
-                // Tiếp tục câu con tiếp theo
-                this.aiTimer = 110;
+                this.aiTimer = activeRank.fishWaitTime;
                 this.bubble = "Đang câu... 🎣";
-                this.bubbleTimer = 80;
+                this.bubbleTimer = 60;
               }
             }
             break;
@@ -330,7 +400,6 @@
         ctx.save();
         ctx.translate(this.x, this.y);
 
-        // Vẽ cần câu khi đang câu
         if (this.isFishing) {
           ctx.strokeStyle = "#8b5a2b";
           ctx.lineWidth = 3;
@@ -339,7 +408,6 @@
           ctx.lineTo(36, -18);
           ctx.stroke();
 
-          // Dây câu & Phao
           ctx.strokeStyle = "rgba(255,255,255,0.7)";
           ctx.lineWidth = 1;
           ctx.beginPath();
@@ -347,44 +415,37 @@
           ctx.lineTo(62, 14);
           ctx.stroke();
 
-          // Phao nổi
           ctx.fillStyle = "#ff4757";
           ctx.beginPath();
           ctx.arc(62, 14, 4, 0, Math.PI * 2);
           ctx.fill();
         }
 
-        // Chân nhân vật
         ctx.fillStyle = "#2c3e50";
         const leg = Math.sin(this.legSwing) * 5;
         ctx.fillRect(-6, 12, 4, 8 + leg);
         ctx.fillRect(2, 12, 4, 8 - leg);
 
-        // Thân áo
         ctx.fillStyle = this.color;
         ctx.beginPath();
         ctx.roundRect(-10, -5, 20, 18, 4);
         ctx.fill();
 
-        // Đầu
         ctx.fillStyle = "#ffdcb4";
         ctx.beginPath();
         ctx.arc(0, -12, 9, 0, Math.PI * 2);
         ctx.fill();
 
-        // Tóc/Mũ
         ctx.fillStyle = this.color;
         ctx.beginPath();
         ctx.arc(0, -16, 9, Math.PI, Math.PI * 2);
         ctx.fill();
 
-        // Tên
         ctx.fillStyle = "#fff";
         ctx.font = "bold 11px sans-serif";
         ctx.textAlign = "center";
         ctx.fillText(this.name, 0, -25);
 
-        // Vòng tròn định vị dưới chân Player
         if (!this.isNPC) {
           ctx.strokeStyle = "#00d2d3";
           ctx.lineWidth = 1.5;
@@ -393,7 +454,6 @@
           ctx.stroke();
         }
 
-        // Bong bóng hội thoại
         if (this.bubble) {
           ctx.fillStyle = "rgba(0,0,0,0.85)";
           ctx.fillRect(-60, -56, 120, 22);
@@ -408,14 +468,35 @@
       }
     }
 
-    // KHỞI TẠO 3 NHÂN VẬT
     const player = new Character("Bạn (Player)", "#0984e3", 300, 220);
     const npc1   = new Character("A Cường", "#d63031", 130, 180, true);
     const npc2   = new Character("Tiểu Hồ", "#fdcb6e", 150, 240, true);
     npc1.dockY = 240;
     npc2.dockY = 320;
 
-    // XỬ LÝ ĐIỀU KHIỂN BÀN PHÍM
+    // HÀM CHỌN RANK
+    function selectRank(rankKey) {
+      activeRank = RANK_CONFIGS[rankKey];
+      document.getElementById('currentRankDisplay').innerText = activeRank.title;
+      document.getElementById('rankModal').style.display = 'none';
+
+      npc1.applyRankSettings(activeRank);
+      npc2.applyRankSettings(activeRank);
+
+      gameStarted = true;
+
+      // Bắt đầu đếm thời gian
+      timerInterval = setInterval(() => {
+        timeLeft--;
+        document.getElementById('timeVal').innerText = timeLeft;
+        if (timeLeft <= 0) {
+          clearInterval(timerInterval);
+          endGame();
+        }
+      }, 1000);
+    }
+
+    // ĐIỀU KHIỂN PHÍM
     const keys = {};
     window.addEventListener('keydown', e => {
       keys[e.key.toLowerCase()] = true;
@@ -428,20 +509,20 @@
     });
 
     function simulateInteract() {
-      // 1. Kiểm tra nếu đang đứng ở Quầy Mồi
+      if (!gameStarted || gameEnded) return;
+
       if (player.x >= SHOP_ZONE.x && player.x <= SHOP_ZONE.x + SHOP_ZONE.w &&
           player.y >= SHOP_ZONE.y && player.y <= SHOP_ZONE.y + SHOP_ZONE.h) {
         openQuizModal();
         return;
       }
 
-      // 2. Kiểm tra nếu đang đứng sát Bến Hồ
       if (player.x >= DOCK_X - 30) {
         playerFishAction();
         return;
       }
 
-      player.bubble = "Hãy đến quầy mồi hoặc mép hồ!";
+      player.bubble = "Hãy đến quầy mồi hoặc bến hồ!";
       player.bubbleTimer = 45;
     }
 
@@ -474,7 +555,6 @@
       }, 1200);
     }
 
-    // XỬ LÝ TRẮC NGHIỆM TẠI QUẦY MỒI
     function openQuizModal() {
       document.getElementById('quizModal').style.display = 'flex';
       nextQuiz();
@@ -526,14 +606,11 @@
       document.getElementById('npc2Bait').innerText = npc2.bait;
     }
 
-    // VẼ BẢN ĐỒ 2D
     let wave = 0;
     function drawMap() {
-      // 1. Mặt cỏ
       ctx.fillStyle = "#27ae60";
       ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-      // 2. Đường mòn đất
       ctx.fillStyle = "#d35400";
       ctx.beginPath();
       ctx.moveTo(110, 220);
@@ -542,7 +619,6 @@
       ctx.strokeStyle = "#c0392b";
       ctx.stroke();
 
-      // 3. Quầy Mồi (Shop Zone)
       ctx.fillStyle = "#8d6e63";
       ctx.fillRect(30, 160, 95, 75);
       for (let s = 0; s < 5; s++) {
@@ -554,20 +630,17 @@
       ctx.fillText("QUẦY MỒI", 75, 195);
       ctx.fillText("🏪 鱼饵", 75, 215);
 
-      // Viền vùng tương tác Quầy mồi
       ctx.strokeStyle = "rgba(255, 235, 59, 0.4)";
       ctx.lineWidth = 2;
       ctx.setLineDash([6, 6]);
       ctx.strokeRect(SHOP_ZONE.x, SHOP_ZONE.y, SHOP_ZONE.w, SHOP_ZONE.h);
       ctx.setLineDash([]);
 
-      // 4. Bến hồ nước
       ctx.fillStyle = "#2980b9";
       ctx.beginPath();
       ctx.ellipse(660, 210, 160, 180, 0, 0, Math.PI * 2);
       ctx.fill();
 
-      // Gợn sóng
       wave += 0.05;
       ctx.strokeStyle = "rgba(255,255,255,0.3)";
       ctx.lineWidth = 2;
@@ -578,29 +651,27 @@
         ctx.stroke();
       }
 
-      // Cầu tàu gỗ
       ctx.fillStyle = "#795548";
       ctx.fillRect(500, 110, 50, 240);
       ctx.fillStyle = "#5d4037";
       for (let y = 120; y <= 340; y += 20) ctx.fillRect(500, y, 50, 2);
 
-      // Hướng dẫn tương tác nổi khi Player đến gần
-      if (player.x >= SHOP_ZONE.x && player.x <= SHOP_ZONE.x + SHOP_ZONE.w &&
-          player.y >= SHOP_ZONE.y && player.y <= SHOP_ZONE.y + SHOP_ZONE.h) {
-        ctx.fillStyle = "#fff";
-        ctx.font = "bold 13px sans-serif";
-        ctx.fillText("👉 Nhấn SPACE để mua mồi", player.x, player.y - 35);
-      } else if (player.x >= DOCK_X - 30) {
-        ctx.fillStyle = "#fff";
-        ctx.font = "bold 13px sans-serif";
-        ctx.fillText("👉 Nhấn SPACE để thả cần", player.x, player.y - 35);
+      if (gameStarted && !gameEnded) {
+        if (player.x >= SHOP_ZONE.x && player.x <= SHOP_ZONE.x + SHOP_ZONE.w &&
+            player.y >= SHOP_ZONE.y && player.y <= SHOP_ZONE.y + SHOP_ZONE.h) {
+          ctx.fillStyle = "#fff";
+          ctx.font = "bold 13px sans-serif";
+          ctx.fillText("👉 Nhấn SPACE để mua mồi", player.x, player.y - 35);
+        } else if (player.x >= DOCK_X - 30) {
+          ctx.fillStyle = "#fff";
+          ctx.font = "bold 13px sans-serif";
+          ctx.fillText("👉 Nhấn SPACE để thả cần", player.x, player.y - 35);
+        }
       }
     }
 
-    // VÒNG LẶP CHÍNH
     function gameLoop() {
-      // Điều khiển Player di chuyển tự do bằng phím
-      if (document.getElementById('quizModal').style.display !== 'flex' && !gameEnded) {
+      if (gameStarted && !gameEnded && document.getElementById('quizModal').style.display !== 'flex') {
         let moved = false;
         if (keys['w'] || keys['arrowup']) { player.y -= player.speed; moved = true; }
         if (keys['s'] || keys['arrowdown']) { player.y += player.speed; moved = true; }
@@ -610,7 +681,6 @@
         if (moved) player.legSwing += 0.25;
         else player.legSwing = 0;
 
-        // Giữ Player trong phạm vi bản đồ
         player.x = Math.max(40, Math.min(540, player.x));
         player.y = Math.max(90, Math.min(370, player.y));
       }
@@ -622,7 +692,6 @@
       npc2.update(); npc2.draw();
       player.update(); player.draw();
 
-      // Hiệu ứng chữ bay
       for (let i = floatingTexts.length - 1; i >= 0; i--) {
         const ft = floatingTexts[i];
         ctx.fillStyle = ft.color;
@@ -637,16 +706,6 @@
     }
     requestAnimationFrame(gameLoop);
 
-    // ĐẾM NGƯỢC THỜI GIAN
-    const timerInterval = setInterval(() => {
-      timeLeft--;
-      document.getElementById('timeVal').innerText = timeLeft;
-      if (timeLeft <= 0) {
-        clearInterval(timerInterval);
-        endGame();
-      }
-    }, 1000);
-
     function endGame() {
       gameEnded = true;
       closeQuizModal();
@@ -655,6 +714,7 @@
       const endDesc = document.getElementById('endDesc');
 
       endDesc.innerHTML = `
+        <b>Cấp độ:</b> ${activeRank.title}<br><br>
         <b>Kết quả chung cuộc:</b><br>
         👤 Bạn: <b>${player.fish}</b> con cá<br>
         🐧 A Cường: <b>${npc1.fish}</b> con cá<br>
@@ -662,11 +722,11 @@
       `;
 
       if (player.fish > npc1.fish && player.fish > npc2.fish) {
-        endTitle.innerText = "🏆 CHIẾN THẮNG! BẠN LÀ VUA CÂU CÁ!";
+        endTitle.innerText = "🏆 CHIẾN THẮNG! VUA CÂU CÁ!";
       } else if (player.fish === npc1.fish || player.fish === npc2.fish) {
-        endTitle.innerText = "🥈 HÒA NHAU! MỘT TRẬN ĐẤU KỊCH TÍNH!";
+        endTitle.innerText = "🥈 HÒA NHAU! MỘT TRẬN ĐẤU CĂNG THẲNG!";
       } else {
-        endTitle.innerText = "🥉 THUA RỒI! HÃY MUA MỒI VÀ GIẬT CẦN NHANH HƠN!";
+        endTitle.innerText = "🥉 THUA RỒI! HÃY THỬ CHƠI LẠI Ở RANK ĐỒNG NHÉ!";
       }
     }
   </script>
