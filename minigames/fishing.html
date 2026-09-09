@@ -3,7 +3,9 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Đại Hội Câu Cá 2D - Chọn Rank Đối Thủ</title>
+  <title>Đại Hội Câu Cá - Online Multiplayer</title>
+  <!-- Nhúng thư viện kết nối mạng P2P PeerJS miễn phí -->
+  <script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, sans-serif; }
     body {
@@ -27,23 +29,22 @@
       margin-bottom: 8px;
     }
     .btn-back { color: #00d2d3; text-decoration: none; font-weight: bold; font-size: 14px; }
-    .rank-badge { background: #34495e; border: 1px solid #feca57; color: #feca57; padding: 4px 12px; border-radius: 15px; font-size: 13px; font-weight: bold; }
+    .room-badge { background: #34495e; border: 1px solid #feca57; color: #feca57; padding: 4px 12px; border-radius: 15px; font-size: 13px; font-weight: bold; }
     .timer { background: #e74c3c; padding: 4px 14px; border-radius: 15px; font-weight: bold; font-size: 15px; }
 
     /* Bảng tỉ số */
     .scoreboard {
       display: flex;
-      gap: 15px;
+      gap: 20px;
       background: #1e1e1e;
       border: 1px solid #333;
-      padding: 8px 18px;
+      padding: 8px 20px;
       border-radius: 8px;
       margin-bottom: 8px;
-      font-size: 14px;
+      font-size: 15px;
     }
-    .score-item { display: flex; align-items: center; gap: 5px; }
+    .score-item { display: flex; align-items: center; gap: 6px; }
 
-    /* Màn Canvas Game */
     #gameCanvas {
       background: #27ae60;
       border-radius: 12px;
@@ -52,13 +53,13 @@
       display: block;
     }
 
-    /* Hướng dẫn & nút ảo */
     .controls-guide {
       margin-top: 8px;
       color: #aaa;
       font-size: 13px;
       text-align: center;
     }
+
     .virtual-keys {
       display: flex;
       gap: 10px;
@@ -86,16 +87,59 @@
       align-items: center;
       z-index: 100;
     }
-    .quiz-card {
+    .modal-card {
       background: #1e1e1e;
       border: 2px solid #00d2d3;
       border-radius: 12px;
       width: 90%;
       max-width: 460px;
-      padding: 22px;
+      padding: 24px;
       text-align: center;
       box-shadow: 0 10px 30px rgba(0,0,0,0.8);
     }
+
+    /* Giao diện chọn chế độ / Phòng online */
+    .btn-block {
+      width: 100%;
+      padding: 12px;
+      margin: 8px 0;
+      font-size: 15px;
+      font-weight: bold;
+      border-radius: 8px;
+      cursor: pointer;
+      border: 1px solid #555;
+      background: #2d3436;
+      color: white;
+      transition: 0.2s;
+    }
+    .btn-block:hover { background: #00d2d3; color: #121212; border-color: #00d2d3; }
+
+    .room-code-box {
+      font-size: 26px;
+      letter-spacing: 4px;
+      font-weight: bold;
+      color: #feca57;
+      background: #111;
+      padding: 10px;
+      border-radius: 6px;
+      border: 1px dashed #feca57;
+      margin: 15px 0;
+    }
+
+    .room-input {
+      width: 100%;
+      padding: 10px;
+      background: #111;
+      border: 1px solid #555;
+      color: #fff;
+      font-size: 18px;
+      text-align: center;
+      border-radius: 6px;
+      margin-bottom: 12px;
+      text-transform: uppercase;
+    }
+
+    /* Modal trắc nghiệm quầy mồi */
     .hanzi-box { font-size: 42px; color: #00d2d3; font-weight: bold; margin: 8px 0; }
     .pinyin-box { color: #feca57; font-size: 16px; margin-bottom: 15px; }
     .quiz-options { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px; }
@@ -106,130 +150,86 @@
     .opt-btn:hover { background: #485460; }
     .opt-btn.correct { background: #2ecc71 !important; }
     .opt-btn.wrong { background: #e74c3c !important; }
-
-    /* Nút chọn Rank */
-    .rank-list { display: flex; flex-direction: column; gap: 12px; margin: 20px 0; }
-    .rank-option-btn {
-      background: #2d3436;
-      border: 2px solid #555;
-      padding: 12px 16px;
-      border-radius: 8px;
-      color: #fff;
-      cursor: pointer;
-      text-align: left;
-      transition: 0.2s;
-    }
-    .rank-option-btn:hover { border-color: #00d2d3; background: #3d4a54; }
-    .rank-name { font-size: 16px; font-weight: bold; display: flex; align-items: center; gap: 8px; }
-    .rank-desc { font-size: 12px; color: #aaa; margin-top: 4px; }
   </style>
 </head>
 <body>
 
   <div class="top-bar">
     <a href="../index.html" class="btn-back">← Về Hub</a>
-    <div class="rank-badge" id="currentRankDisplay">Rank: Chưa chọn</div>
-    <div class="timer">⏳ Thời gian: <span id="timeVal">50</span>s</div>
+    <div class="room-badge" id="statusBadge">Chế độ: Đang chờ</div>
+    <div class="timer">⏳ Thời gian: <span id="timeVal">60</span>s</div>
   </div>
 
   <div class="scoreboard">
-    <div class="score-item">👤 <b>Bạn:</b> <span id="pScore">0</span> 🐟 (Mồi: <span id="pBait" style="color:#00d2d3;">0</span> 🪱)</div>
-    <div class="score-item" style="color:#ff6b6b;">🐧 <b>A Cường:</b> <span id="npc1Score">0</span> 🐟 (Mồi: <span id="npc1Bait">0</span>)</div>
-    <div class="score-item" style="color:#feca57;">🦊 <b>Tiểu Hồ:</b> <span id="npc2Score">0</span> 🐟 (Mồi: <span id="npc2Bait">0</span>)</div>
+    <div class="score-item" style="color:#00d2d3;">👤 <b>Bạn (P1):</b> <span id="p1Score">0</span> 🐟 (Mồi: <span id="p1Bait">0</span> 🪱)</div>
+    <div class="score-item" style="color:#ff6b6b;">👥 <b id="p2Label">Đối Thủ (P2):</b> <span id="p2Score">0</span> 🐟 (Mồi: <span id="p2Bait">0</span> 🪱)</div>
   </div>
 
   <canvas id="gameCanvas" width="800" height="420"></canvas>
 
   <div class="controls-guide">
-    🎮 <b>Cách chơi:</b> Dùng <b>WASD</b> hoặc <b>Phím Mũi Tên</b> để chạy. Nhấn <b>SPACE (Phím Cách)</b> để mua mồi / thả cần.
+    🎮 Dùng phím <b>WASD</b> hoặc <b>Mũi Tên</b> để di chuyển. Nhấn <b>SPACE (Phím Cách)</b> để mua mồi / thả cần.
   </div>
 
   <div class="virtual-keys">
-    <button class="v-btn" onclick="simulateInteract()">⚡ Phím Cách (Mua Mồi / Câu Cá)</button>
+    <button class="v-btn" onclick="simulateInteract()">⚡ Phím Cách (Mua Mồi / Thả Cần)</button>
   </div>
 
-  <!-- 1. POPUP CHỌN RANK ĐỐI THỦ -->
-  <div class="modal-overlay" id="rankModal" style="display: flex;">
-    <div class="quiz-card" style="border-color:#feca57;">
-      <h2 style="color:#feca57; margin-bottom: 5px;">CHỌN RANK ĐỐI THỦ</h2>
-      <p style="color:#bbb; font-size:13px;">Thiết lập trình độ câu cá của A Cường & Tiểu Hồ</p>
-
-      <div class="rank-list">
-        <!-- Rank Đồng -->
-        <button class="rank-option-btn" onclick="selectRank('BRONZE')">
-          <div class="rank-name" style="color:#cd7f32;">🥉 Rank Đồng (Tập Sự - Dễ)</div>
-          <div class="rank-desc">NPC giải đố chậm, đi lững thững, hay giật hụt cá (cá trốn 60%).</div>
-        </button>
-
-        <!-- Rank Vàng -->
-        <button class="rank-option-btn" onclick="selectRank('GOLD')">
-          <div class="rank-name" style="color:#f1c40f;">🥈 Rank Vàng (Bán Chuyên - Vừa)</div>
-          <div class="rank-desc">NPC thao tác đều tay, tỷ lệ câu dính cá 55%, thi đấu cân sức.</div>
-        </button>
-
-        <!-- Rank Thách Đấu -->
-        <button class="rank-option-btn" onclick="selectRank('CHALLENGER')">
-          <div class="rank-name" style="color:#e74c3c;">🥇 Rank Thách Đấu (Thần Cần - Cực Khó)</div>
-          <div class="rank-desc">Cấp độ OP cũ: NPC giải câu siêu tốc, chạy nhanh, giật cá bách phát bách trúng!</div>
-        </button>
-      </div>
+  <!-- 1. MODAL CHỌN CHẾ ĐỘ CHƠI -->
+  <div class="modal-overlay" id="menuModal" style="display: flex;">
+    <div class="modal-card">
+      <h2 style="color:#00d2d3; margin-bottom: 15px;">ĐẠI HỘI CÂU CÁ</h2>
+      <button class="btn-block" onclick="startOfflineMode()">🤖 Chơi Solo với Bot (Offline)</button>
+      <button class="btn-block" style="border-color:#feca57; color:#feca57;" onclick="openHostModal()">👑 Tạo Phòng Mời Bạn (Online)</button>
+      <button class="btn-block" style="border-color:#ff6b6b; color:#ff6b6b;" onclick="openJoinModal()">🔑 Nhập Mã Vào Phòng</button>
     </div>
   </div>
 
-  <!-- 2. POPUP TRẮC NGHIỆM ĐỔI MỒI -->
+  <!-- 2. MODAL TẠO PHÒNG (HOST) -->
+  <div class="modal-overlay" id="hostModal">
+    <div class="modal-card">
+      <h3 style="color:#feca57;">MÃ PHÒNG CỦA BẠN</h3>
+      <p style="color:#aaa; font-size:13px; margin-top:5px;">Hãy gửi mã này cho bạn bè để cùng chơi:</p>
+      <div class="room-code-box" id="hostCodeDisplay">ĐANG TẠO...</div>
+      <p style="font-size:13px; color:#00d2d3;" id="hostWaitingMsg">Đang chờ bạn bè kết nối...</p>
+      <button class="btn-block" style="margin-top:15px;" onclick="closeModal('hostModal')">Hủy</button>
+    </div>
+  </div>
+
+  <!-- 3. MODAL NHẬP MÃ (JOIN) -->
+  <div class="modal-overlay" id="joinModal">
+    <div class="modal-card">
+      <h3 style="color:#ff6b6b;">NHẬP MÃ PHÒNG</h3>
+      <p style="color:#aaa; font-size:13px; margin: 8px 0;">Nhập mã phòng bạn bè gửi cho bạn:</p>
+      <input type="text" id="joinInput" class="room-input" placeholder="VÍ DỤ: FISH123" maxlength="8">
+      <button class="btn-block" style="background:#00d2d3; color:#121212;" onclick="joinRoomAction()">Vào Thi Đấu</button>
+      <button class="btn-block" onclick="closeModal('joinModal')">Quay lại</button>
+    </div>
+  </div>
+
+  <!-- 4. MODAL TRẮC NGHIỆM ĐỔI MỒI -->
   <div class="modal-overlay" id="quizModal">
-    <div class="quiz-card">
+    <div class="modal-card">
       <h3 style="color:#ff9f43;">Quầy Đổi Mồi: Trả lời đúng để nhận mồi!</h3>
       <div class="hanzi-box" id="targetHanzi">...</div>
       <div class="pinyin-box" id="targetPinyin">...</div>
       <div class="quiz-options" id="quizOptions"></div>
-      <button class="v-btn" style="border-color:#e74c3c; color:#e74c3c;" onclick="closeQuizModal()">Rời quầy</button>
+      <button class="btn-block" style="border-color:#e74c3c; color:#e74c3c;" onclick="closeQuizModal()">Rời quầy</button>
     </div>
   </div>
 
-  <!-- 3. POPUP KẾT THÚC -->
+  <!-- 5. MODAL KẾT THÚC -->
   <div class="modal-overlay" id="endModal">
-    <div class="quiz-card" style="border-color:#feca57;">
-      <h2 style="color:#feca57; margin-bottom:12px;" id="endTitle">KẾT THÚC GIẢI ĐẤU!</h2>
+    <div class="modal-card" style="border-color:#feca57;">
+      <h2 style="color:#feca57; margin-bottom:12px;" id="endTitle">HẾT GIỜ!</h2>
       <p id="endDesc" style="margin-bottom:20px; line-height:1.6;"></p>
-      <button class="v-btn" onclick="location.reload()">Chơi lại vòng mới</button>
+      <button class="btn-block" onclick="location.reload()">Trở về Menu</button>
     </div>
   </div>
 
   <script>
     const canvas = document.getElementById('gameCanvas');
     const ctx = canvas.getContext('2d');
-
-    // THÔNG SỐ CÂN BẰNG ĐỘ KHÓ CỦA NPC THEO RANK
-    const RANK_CONFIGS = {
-      BRONZE: {
-        title: "Rank: 🥉 Đồng (Dễ)",
-        npcSpeed: 1.2,
-        thinkTime: 160,       // NPC mất gần 3s mới trả lời xong câu hỏi
-        fishWaitTime: 140,    // Kéo cần lâu
-        catchRate: 0.4        // Chỉ 40% câu trúng cá
-      },
-      GOLD: {
-        title: "Rank: 🥈 Vàng (Vừa)",
-        npcSpeed: 1.7,
-        thinkTime: 95,        // NPC mất ~1.6s để giải đố
-        fishWaitTime: 110,
-        catchRate: 0.55       // 55% câu trúng cá
-      },
-      CHALLENGER: {
-        title: "Rank: 🥇 Thách Đấu (Khó)",
-        npcSpeed: 2.3,
-        thinkTime: 50,        // NPC giải đố siêu tốc
-        fishWaitTime: 85,
-        catchRate: 0.8        // 80% trúng cá (Bản OP)
-      }
-    };
-
-    let activeRank = RANK_CONFIGS.GOLD;
-    let gameStarted = false;
-    let gameEnded = false;
-    let timeLeft = 50;
-    let timerInterval = null;
 
     let words = [
       { id: 1, hanzi: "你好", pinyin: "nǐ hǎo", meaning: "Xin chào" },
@@ -239,10 +239,6 @@
       { id: 5, hanzi: "再见", pinyin: "zàijiàn", meaning: "Tạm biệt" }
     ];
 
-    let currentQ = null;
-    let floatingTexts = [];
-
-    // TẢI TỪ VỰNG TỪ FILE words.txt
     fetch('../words.txt')
       .then(res => res.text())
       .then(txt => {
@@ -257,142 +253,42 @@
         }
       }).catch(() => {});
 
+    // VÙNG BẢN ĐỒ
     const SHOP_ZONE = { x: 30, y: 150, w: 140, h: 140 };
     const DOCK_X = 520;
 
+    let isOnline = false;
+    let isHost = false;
+    let peer = null;
+    let conn = null;
+    let gameStarted = false;
+    let gameEnded = false;
+    let timeLeft = 60;
+    let timerInterval = null;
+
+    let currentQ = null;
+    let floatingTexts = [];
+
+    // NHÂN VẬT
     class Character {
-      constructor(name, color, x, y, isNPC = false) {
+      constructor(name, color, x, y) {
         this.name = name;
         this.color = color;
         this.x = x;
         this.y = y;
-        this.speed = isNPC ? 1.7 : 3.2;
+        this.speed = 3.2;
         this.fish = 0;
         this.bait = 0;
-        this.isNPC = isNPC;
-
         this.bubble = "";
         this.bubbleTimer = 0;
         this.legSwing = 0;
         this.isFishing = false;
-
-        this.aiState = 'WALK_TO_SHOP';
-        this.aiTimer = 0;
-        this.targetX = 140;
-        this.targetY = 200;
-        this.dockY = 180;
-      }
-
-      applyRankSettings(config) {
-        if (this.isNPC) {
-          this.speed = config.npcSpeed;
-        }
       }
 
       update() {
-        if (this.isNPC && gameStarted) {
-          this.updateAI();
-        }
-
         if (this.bubbleTimer > 0) {
           this.bubbleTimer--;
           if (this.bubbleTimer <= 0) this.bubble = "";
-        }
-      }
-
-      updateAI() {
-        if (gameEnded) return;
-
-        switch (this.aiState) {
-          case 'WALK_TO_SHOP':
-            this.moveToTarget(() => {
-              this.aiState = 'BUYING';
-              this.aiTimer = activeRank.thinkTime;
-              const randomW = words[Math.floor(Math.random() * words.length)];
-              this.bubble = `🤔 ${randomW.hanzi}?`;
-              this.bubbleTimer = this.aiTimer;
-            });
-            break;
-
-          case 'BUYING':
-            this.aiTimer--;
-            if (this.aiTimer <= 0) {
-              this.bait++;
-              this.bubble = "✔ +1 Mồi 🪱";
-              this.bubbleTimer = 40;
-              floatingTexts.push({ text: "+1 Mồi 🪱", x: this.x, y: this.y - 25, life: 30, color: "#feca57" });
-              updateUI();
-
-              if (this.bait >= 2) {
-                this.aiState = 'WALK_TO_DOCK';
-                this.targetX = DOCK_X;
-                this.targetY = this.dockY;
-              } else {
-                this.aiTimer = activeRank.thinkTime;
-                const randomW = words[Math.floor(Math.random() * words.length)];
-                this.bubble = `🤔 ${randomW.hanzi}?`;
-                this.bubbleTimer = this.aiTimer;
-              }
-            }
-            break;
-
-          case 'WALK_TO_DOCK':
-            this.moveToTarget(() => {
-              this.aiState = 'FISHING';
-              this.isFishing = true;
-              this.aiTimer = activeRank.fishWaitTime;
-              this.bubble = "Đang câu... 🎣";
-              this.bubbleTimer = 60;
-            });
-            break;
-
-          case 'FISHING':
-            this.aiTimer--;
-            if (this.aiTimer <= 0) {
-              if (this.bait > 0) {
-                this.bait--;
-                if (Math.random() < activeRank.catchRate) {
-                  this.fish++;
-                  this.bubble = "Dính cá! 🎉";
-                  floatingTexts.push({ text: "+1 Cá 🐟", x: this.x + 25, y: this.y - 20, life: 40, color: "#00d2d3" });
-                } else {
-                  this.bubble = "Trượt cá rồi 💨";
-                }
-                this.bubbleTimer = 50;
-                updateUI();
-              }
-
-              if (this.bait <= 0) {
-                this.isFishing = false;
-                this.aiState = 'WALK_TO_SHOP';
-                this.targetX = 140 + (Math.random() * 20 - 10);
-                this.targetY = 190 + (this.name === "A Cường" ? 25 : -25);
-                this.bubble = "Hết mồi rồi! 🏃";
-                this.bubbleTimer = 50;
-              } else {
-                this.aiTimer = activeRank.fishWaitTime;
-                this.bubble = "Đang câu... 🎣";
-                this.bubbleTimer = 60;
-              }
-            }
-            break;
-        }
-      }
-
-      moveToTarget(onArrival) {
-        const dx = this.targetX - this.x;
-        const dy = this.targetY - this.y;
-        const dist = Math.hypot(dx, dy);
-
-        if (dist > this.speed) {
-          this.x += (dx / dist) * this.speed;
-          this.y += (dy / dist) * this.speed;
-          this.legSwing += 0.25;
-        } else {
-          this.x = this.targetX;
-          this.y = this.targetY;
-          this.legSwing = 0;
-          if (onArrival) onArrival();
         }
       }
 
@@ -401,24 +297,11 @@
         ctx.translate(this.x, this.y);
 
         if (this.isFishing) {
-          ctx.strokeStyle = "#8b5a2b";
-          ctx.lineWidth = 3;
-          ctx.beginPath();
-          ctx.moveTo(8, 2);
-          ctx.lineTo(36, -18);
-          ctx.stroke();
-
-          ctx.strokeStyle = "rgba(255,255,255,0.7)";
-          ctx.lineWidth = 1;
-          ctx.beginPath();
-          ctx.moveTo(36, -18);
-          ctx.lineTo(62, 14);
-          ctx.stroke();
-
-          ctx.fillStyle = "#ff4757";
-          ctx.beginPath();
-          ctx.arc(62, 14, 4, 0, Math.PI * 2);
-          ctx.fill();
+          ctx.strokeStyle = "#8b5a2b"; ctx.lineWidth = 3;
+          ctx.beginPath(); ctx.moveTo(8, 2); ctx.lineTo(36, -18); ctx.stroke();
+          ctx.strokeStyle = "rgba(255,255,255,0.7)"; ctx.lineWidth = 1;
+          ctx.beginPath(); ctx.moveTo(36, -18); ctx.lineTo(62, 14); ctx.stroke();
+          ctx.fillStyle = "#ff4757"; ctx.beginPath(); ctx.arc(62, 14, 4, 0, Math.PI * 2); ctx.fill();
         }
 
         ctx.fillStyle = "#2c3e50";
@@ -427,32 +310,18 @@
         ctx.fillRect(2, 12, 4, 8 - leg);
 
         ctx.fillStyle = this.color;
-        ctx.beginPath();
-        ctx.roundRect(-10, -5, 20, 18, 4);
-        ctx.fill();
+        ctx.beginPath(); ctx.roundRect(-10, -5, 20, 18, 4); ctx.fill();
 
         ctx.fillStyle = "#ffdcb4";
-        ctx.beginPath();
-        ctx.arc(0, -12, 9, 0, Math.PI * 2);
-        ctx.fill();
+        ctx.beginPath(); ctx.arc(0, -12, 9, 0, Math.PI * 2); ctx.fill();
 
         ctx.fillStyle = this.color;
-        ctx.beginPath();
-        ctx.arc(0, -16, 9, Math.PI, Math.PI * 2);
-        ctx.fill();
+        ctx.beginPath(); ctx.arc(0, -16, 9, Math.PI, Math.PI * 2); ctx.fill();
 
         ctx.fillStyle = "#fff";
         ctx.font = "bold 11px sans-serif";
         ctx.textAlign = "center";
         ctx.fillText(this.name, 0, -25);
-
-        if (!this.isNPC) {
-          ctx.strokeStyle = "#00d2d3";
-          ctx.lineWidth = 1.5;
-          ctx.beginPath();
-          ctx.ellipse(0, 21, 12, 5, 0, 0, Math.PI * 2);
-          ctx.stroke();
-        }
 
         if (this.bubble) {
           ctx.fillStyle = "rgba(0,0,0,0.85)";
@@ -463,46 +332,194 @@
           ctx.font = "11px sans-serif";
           ctx.fillText(this.bubble, 0, -41);
         }
-
         ctx.restore();
       }
     }
 
-    const player = new Character("Bạn (Player)", "#0984e3", 300, 220);
-    const npc1   = new Character("A Cường", "#d63031", 130, 180, true);
-    const npc2   = new Character("Tiểu Hồ", "#fdcb6e", 150, 240, true);
-    npc1.dockY = 240;
-    npc2.dockY = 320;
+    const player1 = new Character("Bạn (P1)", "#0984e3", 300, 200); // Máy mình
+    const player2 = new Character("Đối Thủ (P2)", "#e84118", 300, 270); // Bạn bè hoặc Bot
 
-    // HÀM CHỌN RANK
-    function selectRank(rankKey) {
-      activeRank = RANK_CONFIGS[rankKey];
-      document.getElementById('currentRankDisplay').innerText = activeRank.title;
-      document.getElementById('rankModal').style.display = 'none';
+    // ---------------- LOGIC KẾT NỐI ONLINE PEERJS ----------------
+    function openHostModal() {
+      document.getElementById('menuModal').style.display = 'none';
+      document.getElementById('hostModal').style.display = 'flex';
 
-      npc1.applyRankSettings(activeRank);
-      npc2.applyRankSettings(activeRank);
+      // Tạo mã ngẫu nhiên 6 ký tự
+      const randomCode = 'F' + Math.floor(10000 + Math.random() * 90000);
+      peer = new Peer(randomCode);
 
-      gameStarted = true;
+      peer.on('open', id => {
+        document.getElementById('hostCodeDisplay').innerText = id;
+      });
 
-      // Bắt đầu đếm thời gian
-      timerInterval = setInterval(() => {
-        timeLeft--;
-        document.getElementById('timeVal').innerText = timeLeft;
-        if (timeLeft <= 0) {
-          clearInterval(timerInterval);
-          endGame();
-        }
-      }, 1000);
+      peer.on('connection', connection => {
+        conn = connection;
+        isOnline = true;
+        isHost = true;
+        setupP2P();
+        document.getElementById('hostWaitingMsg').innerText = "Đối thủ đã kết nối! Đang vào trận...";
+        setTimeout(() => {
+          document.getElementById('hostModal').style.display = 'none';
+          startGame();
+          // Host phát tín hiệu bắt đầu game cho khách
+          conn.send({ type: 'START_GAME' });
+        }, 1200);
+      });
+
+      peer.on('error', err => {
+        alert("Lỗi kết nối phòng: " + err);
+      });
     }
 
-    // ĐIỀU KHIỂN PHÍM
+    function openJoinModal() {
+      document.getElementById('menuModal').style.display = 'none';
+      document.getElementById('joinModal').style.display = 'flex';
+    }
+
+    function joinRoomAction() {
+      const code = document.getElementById('joinInput').value.trim().toUpperCase();
+      if (!code) return alert("Vui lòng nhập mã phòng!");
+
+      peer = new Peer();
+      peer.on('open', () => {
+        conn = peer.connect(code);
+        isOnline = true;
+        isHost = false;
+
+        conn.on('open', () => {
+          setupP2P();
+          document.getElementById('joinModal').style.display = 'none';
+          document.getElementById('statusBadge').innerText = "Chế độ: Khách (P2)";
+          player1.name = "Bạn (P2)";
+          player1.color = "#e84118";
+          player2.name = "Chủ Phòng (P1)";
+          player2.color = "#0984e3";
+          document.getElementById('p2Label').innerText = "Chủ Phòng (P1):";
+        });
+      });
+
+      peer.on('error', err => {
+        alert("Không tìm thấy phòng hoặc lỗi kết nối: " + err);
+      });
+    }
+
+    function setupP2P() {
+      conn.on('data', data => {
+        if (data.type === 'START_GAME') {
+          startGame();
+        } else if (data.type === 'SYNC_POS') {
+          player2.x = data.x;
+          player2.y = data.y;
+          player2.legSwing = data.legSwing;
+          player2.isFishing = data.isFishing;
+          player2.bubble = data.bubble;
+        } else if (data.type === 'SYNC_SCORE') {
+          player2.fish = data.fish;
+          player2.bait = data.bait;
+          updateScoreUI();
+        } else if (data.type === 'SYNC_TIME') {
+          timeLeft = data.timeLeft;
+          document.getElementById('timeVal').innerText = timeLeft;
+        } else if (data.type === 'END_GAME') {
+          endGame();
+        }
+      });
+    }
+
+    function closeModal(id) {
+      document.getElementById(id).style.display = 'none';
+      document.getElementById('menuModal').style.display = 'flex';
+      if (peer) peer.destroy();
+    }
+
+    // ---------------- CHẾ ĐỘ OFFLINE VỚI BOT ----------------
+    function startOfflineMode() {
+      document.getElementById('menuModal').style.display = 'none';
+      document.getElementById('statusBadge').innerText = "Chế độ: Đấu với Bot";
+      player2.name = "Bot A Cường";
+      document.getElementById('p2Label').innerText = "Bot A Cường:";
+      startGame();
+      runBotLogic();
+    }
+
+    function runBotLogic() {
+      if (gameEnded) return;
+      // Chu kỳ Bot đi mua mồi và câu cá
+      setTimeout(() => {
+        if (gameEnded) return;
+        player2.bubble = "Mua mồi... 🪱";
+        player2.bait++;
+        updateScoreUI();
+        setTimeout(() => {
+          if (gameEnded) return;
+          player2.x = DOCK_X;
+          player2.y = 280;
+          player2.isFishing = true;
+          player2.bubble = "Đang câu... 🎣";
+          setTimeout(() => {
+            if (gameEnded) return;
+            player2.isFishing = false;
+            if (player2.bait > 0) {
+              player2.bait--;
+              if (Math.random() < 0.6) {
+                player2.fish++;
+                player2.bubble = "Dính cá! 🎉";
+              }
+            }
+            updateScoreUI();
+            runBotLogic();
+          }, 2000);
+        }, 1500);
+      }, 2500);
+    }
+
+    // ---------------- BẮT ĐẦU TRẬN ĐẤU ----------------
+    function startGame() {
+      gameStarted = true;
+      if (!isOnline) {
+        document.getElementById('statusBadge').innerText = "Chế độ: Chơi Solo";
+      } else {
+        document.getElementById('statusBadge').innerText = isHost ? "Chế độ: Chủ Phòng (P1)" : "Chế độ: Khách (P2)";
+      }
+
+      // Chỉ Host hoặc người chơi Offline quản lý đồng hồ
+      if (!isOnline || isHost) {
+        timerInterval = setInterval(() => {
+          timeLeft--;
+          document.getElementById('timeVal').innerText = timeLeft;
+          if (isOnline && conn && conn.open) {
+            conn.send({ type: 'SYNC_TIME', timeLeft: timeLeft });
+          }
+          if (timeLeft <= 0) {
+            clearInterval(timerInterval);
+            endGame();
+            if (isOnline && conn && conn.open) conn.send({ type: 'END_GAME' });
+          }
+        }, 1000);
+      }
+
+      // Đồng bộ toạ độ người chơi qua mạng 20 lần/giây (20 FPS)
+      if (isOnline) {
+        setInterval(() => {
+          if (conn && conn.open) {
+            conn.send({
+              type: 'SYNC_POS',
+              x: player1.x,
+              y: player1.y,
+              legSwing: player1.legSwing,
+              isFishing: player1.isFishing,
+              bubble: player1.bubble
+            });
+          }
+        }, 50);
+      }
+    }
+
+    // ---------------- ĐIỀU KHIỂN & TƯƠNG TÁC ----------------
     const keys = {};
     window.addEventListener('keydown', e => {
       keys[e.key.toLowerCase()] = true;
-      if (e.key === ' ' || e.key.toLowerCase() === 'e') {
-        simulateInteract();
-      }
+      if (e.key === ' ' || e.key.toLowerCase() === 'e') simulateInteract();
     });
     window.addEventListener('keyup', e => {
       keys[e.key.toLowerCase()] = false;
@@ -511,50 +528,64 @@
     function simulateInteract() {
       if (!gameStarted || gameEnded) return;
 
-      if (player.x >= SHOP_ZONE.x && player.x <= SHOP_ZONE.x + SHOP_ZONE.w &&
-          player.y >= SHOP_ZONE.y && player.y <= SHOP_ZONE.y + SHOP_ZONE.h) {
+      if (player1.x >= SHOP_ZONE.x && player1.x <= SHOP_ZONE.x + SHOP_ZONE.w &&
+          player1.y >= SHOP_ZONE.y && player1.y <= SHOP_ZONE.y + SHOP_ZONE.h) {
         openQuizModal();
         return;
       }
 
-      if (player.x >= DOCK_X - 30) {
+      if (player1.x >= DOCK_X - 30) {
         playerFishAction();
         return;
       }
 
-      player.bubble = "Hãy đến quầy mồi hoặc bến hồ!";
-      player.bubbleTimer = 45;
+      player1.bubble = "Đi đến Quầy mồi hoặc Bến hồ!";
+      player1.bubbleTimer = 40;
     }
 
     function playerFishAction() {
-      if (player.isFishing) return;
-
-      if (player.bait <= 0) {
-        player.bubble = "Hết mồi rồi! Vào quầy mua thêm 🪱";
-        player.bubbleTimer = 50;
+      if (player1.isFishing) return;
+      if (player1.bait <= 0) {
+        player1.bubble = "Hết mồi! Vào quầy trả lời từ vựng 🪱";
+        player1.bubbleTimer = 50;
         return;
       }
 
-      player.bait--;
-      updateUI();
-      player.isFishing = true;
-      player.bubble = "Đang kéo cần... 🎣";
-      player.bubbleTimer = 60;
+      player1.bait--;
+      player1.isFishing = true;
+      player1.bubble = "Đang giật cần... 🎣";
+      player1.bubbleTimer = 60;
+      broadcastScore();
 
       setTimeout(() => {
-        if (Math.random() < 0.75) {
-          player.fish++;
-          player.bubble = "Dính 1 chú cá! 🎉";
-          floatingTexts.push({ text: "+1 Cá 🐟", x: player.x + 25, y: player.y - 20, life: 40, color: "#00d2d3" });
+        if (Math.random() < 0.7) {
+          player1.fish++;
+          player1.bubble = "Dính 1 chú cá! 🎉";
+          floatingTexts.push({ text: "+1 Cá 🐟", x: player1.x + 25, y: player1.y - 20, life: 40, color: "#00d2d3" });
         } else {
-          player.bubble = "Trượt rồi, cá ăn mất mồi 💨";
+          player1.bubble = "Cá ăn mất mồi 💨";
         }
-        player.bubbleTimer = 50;
-        player.isFishing = false;
-        updateUI();
+        player1.bubbleTimer = 40;
+        player1.isFishing = false;
+        broadcastScore();
       }, 1200);
     }
 
+    function broadcastScore() {
+      updateScoreUI();
+      if (isOnline && conn && conn.open) {
+        conn.send({ type: 'SYNC_SCORE', fish: player1.fish, bait: player1.bait });
+      }
+    }
+
+    function updateScoreUI() {
+      document.getElementById('p1Score').innerText = player1.fish;
+      document.getElementById('p1Bait').innerText = player1.bait;
+      document.getElementById('p2Score').innerText = player2.fish;
+      document.getElementById('p2Bait').innerText = player2.bait;
+    }
+
+    // ---------------- LOGIC CÂU HỎI QUẦY MỒI ----------------
     function openQuizModal() {
       document.getElementById('quizModal').style.display = 'flex';
       nextQuiz();
@@ -579,39 +610,28 @@
         const btn = document.createElement('button');
         btn.className = 'opt-btn';
         btn.innerText = opt;
-        btn.onclick = () => checkQuiz(btn, opt);
+        btn.onclick = () => {
+          document.querySelectorAll('.opt-btn').forEach(b => b.disabled = true);
+          if (opt === currentQ.meaning) {
+            btn.classList.add('correct');
+            player1.bait++;
+            broadcastScore();
+            floatingTexts.push({ text: "+1 Mồi 🪱", x: player1.x, y: player1.y - 30, life: 30, color: "#2ecc71" });
+          } else {
+            btn.classList.add('wrong');
+          }
+          setTimeout(nextQuiz, 650);
+        };
         grid.appendChild(btn);
       });
     }
 
-    function checkQuiz(btn, selected) {
-      document.querySelectorAll('.opt-btn').forEach(b => b.disabled = true);
-      if (selected === currentQ.meaning) {
-        btn.classList.add('correct');
-        player.bait++;
-        updateUI();
-        floatingTexts.push({ text: "+1 Mồi 🪱", x: player.x, y: player.y - 30, life: 30, color: "#2ecc71" });
-      } else {
-        btn.classList.add('wrong');
-      }
-      setTimeout(nextQuiz, 650);
-    }
-
-    function updateUI() {
-      document.getElementById('pScore').innerText = player.fish;
-      document.getElementById('pBait').innerText = player.bait;
-      document.getElementById('npc1Score').innerText = npc1.fish;
-      document.getElementById('npc1Bait').innerText = npc1.bait;
-      document.getElementById('npc2Score').innerText = npc2.fish;
-      document.getElementById('npc2Bait').innerText = npc2.bait;
-    }
-
+    // ---------------- VẼ BẢN ĐỒ & GAME LOOP ----------------
     let wave = 0;
     function drawMap() {
       ctx.fillStyle = "#27ae60";
       ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-      ctx.fillStyle = "#d35400";
       ctx.beginPath();
       ctx.moveTo(110, 220);
       ctx.quadraticCurveTo(310, 260, 520, 230);
@@ -625,47 +645,38 @@
         ctx.fillStyle = s % 2 === 0 ? "#e74c3c" : "#ecf0f1";
         ctx.fillRect(25 + s * 21, 140, 21, 25);
       }
-      ctx.fillStyle = "#fff";
-      ctx.font = "bold 12px sans-serif";
+      ctx.fillStyle = "#fff"; ctx.font = "bold 12px sans-serif";
       ctx.fillText("QUẦY MỒI", 75, 195);
       ctx.fillText("🏪 鱼饵", 75, 215);
 
       ctx.strokeStyle = "rgba(255, 235, 59, 0.4)";
-      ctx.lineWidth = 2;
-      ctx.setLineDash([6, 6]);
+      ctx.lineWidth = 2; ctx.setLineDash([6, 6]);
       ctx.strokeRect(SHOP_ZONE.x, SHOP_ZONE.y, SHOP_ZONE.w, SHOP_ZONE.h);
       ctx.setLineDash([]);
 
       ctx.fillStyle = "#2980b9";
-      ctx.beginPath();
-      ctx.ellipse(660, 210, 160, 180, 0, 0, Math.PI * 2);
-      ctx.fill();
+      ctx.beginPath(); ctx.ellipse(660, 210, 160, 180, 0, 0, Math.PI * 2); ctx.fill();
 
       wave += 0.05;
-      ctx.strokeStyle = "rgba(255,255,255,0.3)";
-      ctx.lineWidth = 2;
+      ctx.strokeStyle = "rgba(255,255,255,0.3)"; ctx.lineWidth = 2;
       for (let i = 0; i < 4; i++) {
         ctx.beginPath();
-        const py = 120 + i * 60;
-        ctx.arc(630 + Math.sin(wave + i) * 12, py, 25, 0, Math.PI);
+        ctx.arc(630 + Math.sin(wave + i) * 12, 120 + i * 60, 25, 0, Math.PI);
         ctx.stroke();
       }
 
-      ctx.fillStyle = "#795548";
-      ctx.fillRect(500, 110, 50, 240);
+      ctx.fillStyle = "#795548"; ctx.fillRect(500, 110, 50, 240);
       ctx.fillStyle = "#5d4037";
       for (let y = 120; y <= 340; y += 20) ctx.fillRect(500, y, 50, 2);
 
       if (gameStarted && !gameEnded) {
-        if (player.x >= SHOP_ZONE.x && player.x <= SHOP_ZONE.x + SHOP_ZONE.w &&
-            player.y >= SHOP_ZONE.y && player.y <= SHOP_ZONE.y + SHOP_ZONE.h) {
-          ctx.fillStyle = "#fff";
-          ctx.font = "bold 13px sans-serif";
-          ctx.fillText("👉 Nhấn SPACE để mua mồi", player.x, player.y - 35);
-        } else if (player.x >= DOCK_X - 30) {
-          ctx.fillStyle = "#fff";
-          ctx.font = "bold 13px sans-serif";
-          ctx.fillText("👉 Nhấn SPACE để thả cần", player.x, player.y - 35);
+        if (player1.x >= SHOP_ZONE.x && player1.x <= SHOP_ZONE.x + SHOP_ZONE.w &&
+            player1.y >= SHOP_ZONE.y && player1.y <= SHOP_ZONE.y + SHOP_ZONE.h) {
+          ctx.fillStyle = "#fff"; ctx.font = "bold 13px sans-serif";
+          ctx.fillText("👉 Nhấn SPACE để mua mồi", player1.x, player1.y - 35);
+        } else if (player1.x >= DOCK_X - 30) {
+          ctx.fillStyle = "#fff"; ctx.font = "bold 13px sans-serif";
+          ctx.fillText("👉 Nhấn SPACE để thả cần", player1.x, player1.y - 35);
         }
       }
     }
@@ -673,24 +684,23 @@
     function gameLoop() {
       if (gameStarted && !gameEnded && document.getElementById('quizModal').style.display !== 'flex') {
         let moved = false;
-        if (keys['w'] || keys['arrowup']) { player.y -= player.speed; moved = true; }
-        if (keys['s'] || keys['arrowdown']) { player.y += player.speed; moved = true; }
-        if (keys['a'] || keys['arrowleft']) { player.x -= player.speed; moved = true; }
-        if (keys['d'] || keys['arrowright']) { player.x += player.speed; moved = true; }
+        if (keys['w'] || keys['arrowup']) { player1.y -= player1.speed; moved = true; }
+        if (keys['s'] || keys['arrowdown']) { player1.y += player1.speed; moved = true; }
+        if (keys['a'] || keys['arrowleft']) { player1.x -= player1.speed; moved = true; }
+        if (keys['d'] || keys['arrowright']) { player1.x += player1.speed; moved = true; }
 
-        if (moved) player.legSwing += 0.25;
-        else player.legSwing = 0;
+        if (moved) player1.legSwing += 0.25;
+        else player1.legSwing = 0;
 
-        player.x = Math.max(40, Math.min(540, player.x));
-        player.y = Math.max(90, Math.min(370, player.y));
+        player1.x = Math.max(40, Math.min(540, player1.x));
+        player1.y = Math.max(90, Math.min(370, player1.y));
       }
 
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       drawMap();
 
-      npc1.update(); npc1.draw();
-      npc2.update(); npc2.draw();
-      player.update(); player.draw();
+      player2.update(); player2.draw();
+      player1.update(); player1.draw();
 
       for (let i = floatingTexts.length - 1; i >= 0; i--) {
         const ft = floatingTexts[i];
@@ -714,19 +724,17 @@
       const endDesc = document.getElementById('endDesc');
 
       endDesc.innerHTML = `
-        <b>Cấp độ:</b> ${activeRank.title}<br><br>
-        <b>Kết quả chung cuộc:</b><br>
-        👤 Bạn: <b>${player.fish}</b> con cá<br>
-        🐧 A Cường: <b>${npc1.fish}</b> con cá<br>
-        🦊 Tiểu Hồ: <b>${npc2.fish}</b> con cá
+        <b>Kết quả trận đấu:</b><br>
+        👤 Bạn: <b>${player1.fish}</b> cá<br>
+        👥 Đối thủ: <b>${player2.fish}</b> cá
       `;
 
-      if (player.fish > npc1.fish && player.fish > npc2.fish) {
-        endTitle.innerText = "🏆 CHIẾN THẮNG! VUA CÂU CÁ!";
-      } else if (player.fish === npc1.fish || player.fish === npc2.fish) {
-        endTitle.innerText = "🥈 HÒA NHAU! MỘT TRẬN ĐẤU CĂNG THẲNG!";
+      if (player1.fish > player2.fish) {
+        endTitle.innerText = "🏆 BẠN ĐÃ CHIẾN THẮNG!";
+      } else if (player1.fish === player2.fish) {
+        endTitle.innerText = "🤝 HAI BÊN HÒA NHAU!";
       } else {
-        endTitle.innerText = "🥉 THUA RỒI! HÃY THỬ CHƠI LẠI Ở RANK ĐỒNG NHÉ!";
+        endTitle.innerText = "💀 BẠN ĐÃ BỊ ĐÁNH BẠI!";
       }
     }
   </script>
