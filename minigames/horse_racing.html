@@ -3,18 +3,20 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Đường Đua Phối Cảnh - Horse Racing 2.5D</title>
+  <title>Đường Đua Hán Tự - Đua Ngựa Online</title>
+  <!-- Thư viện kết nối mạng P2P PeerJS miễn phí -->
+  <script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, sans-serif; -webkit-tap-highlight-color: transparent; }
     body {
-      background: #111;
+      background: #0d1117;
       color: #fff;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: flex-start;
       min-height: 100vh;
-      padding: 10px;
+      padding: 10px 8px;
       user-select: none;
       touch-action: manipulation;
       overflow-x: hidden;
@@ -22,58 +24,57 @@
 
     .header-bar {
       width: 100%;
-      max-width: 840px;
+      max-width: 560px;
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 8px;
+      margin-bottom: 6px;
     }
     .btn-back { color: #00d2d3; text-decoration: none; font-weight: bold; font-size: 14px; }
-    .badge-info { background: #2d3436; border: 1px solid #485460; padding: 4px 10px; border-radius: 12px; font-size: 12px; font-weight: bold; }
-    .race-info { font-size: 14px; color: #feca57; font-weight: bold; }
+    .badge-info { background: #21262d; border: 1px solid #30363d; padding: 3px 10px; border-radius: 12px; font-size: 12px; font-weight: bold; color: #feca57; }
+    .race-info { font-size: 14px; color: #00d2d3; font-weight: bold; }
 
-    /* Khu vực trò chơi */
     .game-wrapper {
       position: relative;
       width: 100%;
-      max-width: 840px;
+      max-width: 560px;
       display: flex;
-      gap: 10px;
+      gap: 8px;
     }
 
-    /* 1. Thanh đo quãng đường bên trái */
+    /* Thanh tiến trình cự ly bên trái */
     .track-sidebar {
-      width: 58px;
-      background: #1c1f26;
-      border: 1px solid #333;
+      width: 48px;
+      background: #161b22;
+      border: 1px solid #30363d;
       border-radius: 8px;
       position: relative;
       display: flex;
       flex-direction: column;
       align-items: center;
-      padding: 10px 0;
+      padding: 8px 0;
     }
-    .finish-icon { font-size: 20px; }
+    .finish-icon { font-size: 18px; }
     .progress-rail {
       position: relative;
-      width: 8px;
-      height: 400px;
-      background: #2d3436;
-      border-radius: 4px;
+      width: 6px;
+      height: 520px;
+      background: #21262d;
+      border-radius: 3px;
       margin-top: 6px;
     }
     .runner-marker {
       position: absolute;
       left: 50%;
       transform: translate(-50%, 50%);
-      font-size: 18px;
+      font-size: 16px;
       transition: bottom 0.1s linear;
     }
-    .marker-p { filter: drop-shadow(0 0 5px #00d2d3); z-index: 3; }
-    .marker-npc1 { filter: drop-shadow(0 0 5px #ff6b6b); z-index: 2; }
-    .marker-npc2 { filter: drop-shadow(0 0 5px #feca57); z-index: 2; }
+    .marker-p1 { filter: drop-shadow(0 0 5px #00d2d3); z-index: 3; }
+    .marker-p2 { filter: drop-shadow(0 0 5px #ff6b6b); z-index: 2; }
+    .marker-p3 { filter: drop-shadow(0 0 5px #feca57); z-index: 2; }
 
-    /* 2. Màn hình Canvas */
+    /* Khung Canvas dọc Subway Surfers */
     .canvas-container {
       position: relative;
       flex: 1;
@@ -81,33 +82,34 @@
     #raceCanvas {
       width: 100%;
       height: auto;
-      aspect-ratio: 760 / 480;
-      background: #0f141d;
+      aspect-ratio: 500 / 720;
+      background: #090d13;
       border-radius: 10px;
-      border: 2px solid #444;
+      border: 2px solid #30363d;
       display: block;
-      box-shadow: 0 8px 25px rgba(0,0,0,0.8);
+      box-shadow: 0 10px 30px rgba(0,0,0,0.85);
     }
 
     /* Đồng hồ tốc độ */
     .speed-gauge-box {
       position: absolute;
-      top: 12px;
-      right: 15px;
-      background: rgba(15, 20, 29, 0.85);
+      top: 8px;
+      right: 8px;
+      background: rgba(13, 17, 23, 0.88);
       border: 1px solid rgba(255,255,255,0.2);
-      padding: 6px 14px;
+      padding: 4px 10px;
       border-radius: 20px;
       display: flex;
       align-items: center;
-      gap: 10px;
-      font-size: 12px;
+      gap: 6px;
+      font-size: 11px;
+      z-index: 5;
     }
     .speed-bar-bg {
-      width: 90px;
-      height: 10px;
-      background: #2d3436;
-      border-radius: 5px;
+      width: 65px;
+      height: 6px;
+      background: #21262d;
+      border-radius: 3px;
       overflow: hidden;
     }
     .speed-bar-fill {
@@ -118,42 +120,39 @@
     }
     .speed-bar-fill.boosted {
       background: linear-gradient(90deg, #ff9f43, #ee5253);
-      box-shadow: 0 0 10px #ff793f;
+      box-shadow: 0 0 8px #ff793f;
     }
-    .speed-bar-fill.slowed {
-      background: #7f8c8d;
-    }
+    .speed-bar-fill.slowed { background: #7f8c8d; }
 
-    /* Popup trắc nghiệm tăng tốc */
+    /* Khung câu hỏi trắc nghiệm trên bầu trời */
     .quiz-overlay-strip {
       position: absolute;
-      bottom: 12px;
-      left: 12px;
-      right: 12px;
-      background: rgba(15, 20, 29, 0.96);
+      top: 6px;
+      left: 6px;
+      right: 6px;
+      background: rgba(13, 17, 23, 0.96);
       border: 2px solid #00d2d3;
       border-radius: 8px;
-      padding: 10px 14px;
+      padding: 6px 10px;
       display: none;
       flex-direction: column;
-      gap: 6px;
-      box-shadow: 0 4px 20px rgba(0,210,211,0.3);
-      z-index: 10;
+      gap: 4px;
+      box-shadow: 0 4px 20px rgba(0,210,211,0.35);
+      z-index: 20;
     }
     .quiz-top-info {
       display: flex;
       justify-content: space-between;
       align-items: center;
     }
-    .quiz-prompt { font-size: 18px; font-weight: bold; color: #00d2d3; }
-    .quiz-pinyin { font-size: 13px; color: #aaa; margin-left: 6px; }
+    .quiz-prompt { font-size: 17px; font-weight: bold; color: #00d2d3; }
+    .quiz-pinyin { font-size: 12px; color: #feca57; margin-left: 6px; }
     .quiz-timer-bar-bg {
       width: 100%;
-      height: 4px;
+      height: 3px;
       background: #333;
       border-radius: 2px;
       overflow: hidden;
-      margin: 2px 0 4px 0;
     }
     .quiz-timer-bar-fill {
       width: 100%;
@@ -164,16 +163,17 @@
     .quiz-btn-grid {
       display: grid;
       grid-template-columns: repeat(4, 1fr);
-      gap: 8px;
+      gap: 5px;
+      margin-top: 2px;
     }
     .quiz-opt-btn {
-      background: #2d3436;
+      background: #21262d;
       color: #fff;
-      border: 1px solid #485460;
-      padding: 8px 4px;
-      border-radius: 6px;
+      border: 1px solid #30363d;
+      padding: 6px 2px;
+      border-radius: 5px;
       cursor: pointer;
-      font-size: 13px;
+      font-size: 12px;
       font-weight: 500;
       white-space: nowrap;
       overflow: hidden;
@@ -181,34 +181,34 @@
     }
     .quiz-opt-btn:active { background: #00d2d3; color: #111; }
 
-    /* Điều khiển Mobile */
+    /* Cụm điều khiển Mobile */
     .mobile-controls {
       display: none;
       width: 100%;
-      max-width: 840px;
+      max-width: 560px;
       justify-content: space-between;
-      gap: 15px;
-      margin-top: 10px;
+      gap: 10px;
+      margin-top: 8px;
     }
     .btn-steer {
       flex: 1;
-      background: #2d3436;
+      background: #21262d;
       border: 1px solid #00d2d3;
       color: #fff;
       padding: 14px;
       border-radius: 8px;
-      font-size: 18px;
+      font-size: 17px;
       font-weight: bold;
     }
     .btn-steer:active { background: #00d2d3; color: #111; }
 
     .pc-guide {
-      margin-top: 10px;
-      color: #888;
-      font-size: 13px;
+      margin-top: 6px;
+      color: #8b949e;
+      font-size: 12px;
       text-align: center;
     }
-    .kbd { background: #333; color: #00d2d3; padding: 2px 6px; border-radius: 4px; font-weight: bold; }
+    .kbd { background: #21262d; color: #00d2d3; padding: 2px 6px; border-radius: 4px; font-weight: bold; border: 1px solid #30363d; }
 
     @media (pointer: coarse) {
       .mobile-controls { display: flex !important; }
@@ -218,55 +218,62 @@
 
     /* Modal dùng chung */
     .modal-overlay {
-      display: none;
+      display: flex;
       position: fixed;
       top: 0; left: 0; width: 100%; height: 100%;
-      background: rgba(0,0,0,0.85);
+      background: rgba(13, 17, 23, 0.94);
       justify-content: center;
       align-items: center;
       z-index: 100;
       padding: 15px;
     }
     .modal-card {
-      background: #1c1f26;
+      background: #161b22;
       border: 2px solid #00d2d3;
       border-radius: 12px;
-      padding: 22px;
+      padding: 20px;
       text-align: center;
-      max-width: 460px;
+      max-width: 440px;
       width: 100%;
       box-shadow: 0 10px 30px rgba(0,0,0,0.9);
     }
-    .setting-group { margin-bottom: 16px; text-align: left; }
-    .setting-title { font-size: 13px; color: #aaa; margin-bottom: 6px; font-weight: bold; }
-    .choice-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
-    .choice-btn {
-      background: #2d3436;
-      border: 1px solid #485460;
-      padding: 10px 4px;
-      border-radius: 6px;
-      color: #fff;
-      font-size: 12px;
-      font-weight: bold;
-      cursor: pointer;
-    }
-    .choice-btn.active {
-      border-color: #00d2d3;
-      background: rgba(0, 210, 211, 0.2);
-      color: #00d2d3;
-    }
-
-    .btn-start {
-      background: linear-gradient(90deg, #00d2d3, #0984e3);
-      color: #111;
-      border: none;
+    .btn-block {
       width: 100%;
       padding: 12px;
+      margin: 8px 0;
+      font-size: 14px;
       font-weight: bold;
       border-radius: 8px;
       cursor: pointer;
-      font-size: 15px;
-      margin-top: 10px;
+      border: 1px solid #30363d;
+      background: #21262d;
+      color: white;
+      transition: 0.2s;
+    }
+    .btn-block:active { background: #00d2d3; color: #111; }
+
+    .room-code-box {
+      font-size: 26px;
+      letter-spacing: 4px;
+      font-weight: bold;
+      color: #feca57;
+      background: #0d1117;
+      padding: 10px;
+      border-radius: 6px;
+      border: 1px dashed #feca57;
+      margin: 12px 0;
+    }
+    .room-input {
+      width: 100%;
+      padding: 10px;
+      background: #0d1117;
+      border: 1px solid #30363d;
+      color: #fff;
+      font-size: 18px;
+      text-align: center;
+      border-radius: 6px;
+      margin-bottom: 12px;
+      text-transform: uppercase;
     }
   </style>
 </head>
@@ -274,36 +281,34 @@
 
   <div class="header-bar">
     <a href="../index.html" class="btn-back">← Về Hub</a>
-    <div class="badge-info" id="badgeSettings">Vàng • 3000m</div>
+    <div class="badge-info" id="badgeSettings">Chờ chọn chế độ</div>
     <div class="race-info">Đích: <span id="distDisplay">0</span> / <span id="maxDistDisplay">3000</span>m</div>
   </div>
 
   <div class="game-wrapper">
-    <!-- Thanh quãng đường bên trái -->
+    <!-- Thanh tiến trình cự ly -->
     <div class="track-sidebar">
       <div class="finish-icon">🏁</div>
       <div class="progress-rail">
-        <div class="runner-marker marker-p" id="markerP" style="bottom: 0%;">🏇</div>
-        <div class="runner-marker marker-npc1" id="markerNpc1" style="bottom: 0%;">🐴</div>
-        <div class="runner-marker marker-npc2" id="markerNpc2" style="bottom: 0%;">🦄</div>
+        <div class="runner-marker marker-p1" id="markerP1" style="bottom: 0%;">🏇</div>
+        <div class="runner-marker marker-p2" id="markerP2" style="bottom: 0%;">🐴</div>
+        <div class="runner-marker marker-p3" id="markerP3" style="bottom: 0%;">🦄</div>
       </div>
-      <div style="font-size:16px; margin-top:5px;">🚩</div>
+      <div style="font-size:15px; margin-top:5px;">🚩</div>
     </div>
 
-    <!-- Màn hình đua Canvas Phối cảnh 2.5D -->
+    <!-- Màn Canvas dọc -->
     <div class="canvas-container">
-      <canvas id="raceCanvas" width="760" height="480"></canvas>
+      <canvas id="raceCanvas" width="500" height="720"></canvas>
 
-      <!-- Đồng hồ tốc độ -->
       <div class="speed-gauge-box">
-        <span>⚡ Vận tốc:</span>
+        <span>⚡ Tốc độ:</span>
         <div class="speed-bar-bg">
           <div class="speed-bar-fill" id="speedBarFill"></div>
         </div>
-        <span id="speedVal" style="font-weight:bold; min-width:45px;">55 km/h</span>
+        <span id="speedVal" style="font-weight:bold; min-width:42px;">55 km/h</span>
       </div>
 
-      <!-- Khung câu hỏi xuất hiện -->
       <div class="quiz-overlay-strip" id="quizStrip">
         <div class="quiz-top-info">
           <div>
@@ -320,51 +325,60 @@
     </div>
   </div>
 
-  <!-- Nút điều khiển Mobile -->
+  <!-- Nút cảm ứng Mobile -->
   <div class="mobile-controls">
     <button class="btn-steer" id="btnLeft">⬅ LÀN TRÁI</button>
     <button class="btn-steer" id="btnRight">LÀN PHẢI ➡</button>
   </div>
 
-  <!-- Hướng dẫn Desktop -->
+  <!-- Hướng dẫn PC -->
   <div class="pc-guide">
-    🎮 <b>Chuyển làn né rào:</b> Phím <span class="kbd">A</span> / <span class="kbd">D</span> hoặc <span class="kbd">←</span> <span class="kbd">→</span> &nbsp;|&nbsp;
-    🚀 <b>Tự động chạy:</b> Không cần bấm nút chạy! Trả lời đúng để bứt tốc vượt lên!
+    🎮 <b>Né làn:</b> Phím <span class="kbd">A</span> / <span class="kbd">D</span> hoặc <span class="kbd">←</span> <span class="kbd">→</span> &nbsp;|&nbsp;
+    🚀 Né rào chắn và chọn đúng Hán tự trên bầu trời để vượt đối thủ!
   </div>
 
-  <!-- Modal Thiết lập phòng đua (Rank + Chiều dài chặng) -->
-  <div class="modal-overlay" id="settingModal" style="display: flex;">
+  <!-- 1. MODAL CHỌN CHẾ ĐỘ -->
+  <div class="modal-overlay" id="menuModal">
     <div class="modal-card">
-      <h2 style="color:#00d2d3; margin-bottom: 12px;">CẤU HÌNH ĐƯỜNG ĐUA</h2>
-
-      <div class="setting-group">
-        <div class="setting-title">1. Chọn độ dài chặng đua:</div>
-        <div class="choice-grid">
-          <button class="choice-btn" onclick="setTrackDist(1500, this)">1.500m<br>(Chạy Nhanh)</button>
-          <button class="choice-btn active" onclick="setTrackDist(3000, this)">3.000m<br>(Tiêu chuẩn)</button>
-          <button class="choice-btn" onclick="setTrackDist(5000, this)">5.000m<br>(Marathon)</button>
-        </div>
-      </div>
-
-      <div class="setting-group">
-        <div class="setting-title">2. Chọn Rank đối thủ (A Cường & Tiểu Hồ):</div>
-        <div class="choice-grid">
-          <button class="choice-btn" onclick="setRank('BRONZE', this)">🥉 Đồng<br>(Dễ)</button>
-          <button class="choice-btn active" onclick="setRank('GOLD', this)">🥈 Vàng<br>(Cân bằng)</button>
-          <button class="choice-btn" onclick="setRank('CHALLENGER', this)">🥇 Thách Đấu<br>(Cao thủ)</button>
-        </div>
-      </div>
-
-      <button class="btn-start" onclick="startGame()">VÀO ĐUA NGAY 🏁</button>
+      <h2 style="color:#00d2d3; margin-bottom: 12px; font-size: 20px;">ĐƯỜNG ĐUA HÁN TỰ</h2>
+      <button class="btn-block" onclick="startOfflineMode()">🤖 Chơi Solo (Bạn + 2 NPC)</button>
+      <button class="btn-block" style="border-color:#feca57; color:#feca57;" onclick="openHostModal()">👑 Tạo Phòng (Mời Bạn)</button>
+      <button class="btn-block" style="border-color:#ff6b6b; color:#ff6b6b;" onclick="openJoinModal()">🔑 Nhập Mã Vào Phòng</button>
     </div>
   </div>
 
-  <!-- Modal Kết thúc -->
-  <div class="modal-overlay" id="endModal">
+  <!-- 2. MODAL TẠO PHÒNG (HOST) -->
+  <div class="modal-overlay" id="hostModal" style="display: none;">
+    <div class="modal-card">
+      <h3 style="color:#feca57;">MÃ PHÒNG ONLINE</h3>
+      <p style="color:#aaa; font-size:12px; margin-top:4px;">Gửi mã này cho bạn bè để vào đua cùng:</p>
+      <div class="room-code-box" id="hostCodeDisplay">ĐANG TẠO...</div>
+      <p style="font-size:13px; color:#00d2d3;" id="hostStatusMsg">Đang chờ bạn bè kết nối...</p>
+      
+      <!-- Nút thêm NPC lấp đầy phòng nếu bạn chưa vào -->
+      <button class="btn-block" style="background:#00d2d3; color:#111; margin-top:12px;" onclick="hostStartWithBots()">
+        ⚡ Bắt đầu ngay (Lấp đầy phòng bằng NPC)
+      </button>
+      <button class="btn-block" onclick="closeModal('hostModal')">Hủy</button>
+    </div>
+  </div>
+
+  <!-- 3. MODAL NHẬP MÃ (JOIN) -->
+  <div class="modal-overlay" id="joinModal" style="display: none;">
+    <div class="modal-card">
+      <h3 style="color:#ff6b6b;">NHẬP MÃ PHÒNG</h3>
+      <input type="text" id="joinInput" class="room-input" placeholder="MÃ PHÒNG (VD: H1234)" maxlength="8">
+      <button class="btn-block" style="background:#00d2d3; color:#111;" onclick="joinRoomAction()">Vào Thi Đấu</button>
+      <button class="btn-block" onclick="closeModal('joinModal')">Quay lại</button>
+    </div>
+  </div>
+
+  <!-- 4. MODAL KẾT THÚC -->
+  <div class="modal-overlay" id="endModal" style="display: none;">
     <div class="modal-card" style="border-color: #feca57;">
-      <h2 style="color:#feca57; margin-bottom:12px;" id="endTitle">VỀ ĐÍCH!</h2>
-      <p id="endDetails" style="color:#ccc; line-height:1.6; font-size:14px;"></p>
-      <button class="btn-start" onclick="location.reload()">Đua Vòng Mới</button>
+      <h2 style="color:#feca57; margin-bottom:10px;" id="endTitle">VỀ ĐÍCH!</h2>
+      <p id="endDetails" style="color:#ccc; line-height:1.6; font-size:13px;"></p>
+      <button class="btn-block" onclick="location.reload()">Đua Vòng Mới</button>
     </div>
   </div>
 
@@ -372,14 +386,12 @@
     const canvas = document.getElementById('raceCanvas');
     const ctx = canvas.getContext('2d');
 
-    let TOTAL_RACE_DIST = 3000;
-    const RANK_CONFIGS = {
-      BRONZE:     { title: "Đồng", base1: 46, base2: 48, variance: 4 },
-      GOLD:       { title: "Vàng", base1: 53, base2: 55, variance: 5 },
-      CHALLENGER: { title: "Thách Đấu", base1: 62, base2: 65, variance: 6 }
-    };
-    let currentRank = RANK_CONFIGS.GOLD;
+    const TOTAL_RACE_DIST = 3000;
 
+    let isOnline = false;
+    let isHost = false;
+    let peer = null;
+    let conn = null;
     let gameStarted = false;
     let gameEnded = false;
 
@@ -399,86 +411,213 @@
           const list = [];
           for (let i = 1; i < lines.length; i++) {
             const cols = lines[i].split('\t');
-            if (cols.length >= 4) {
-              list.push({ id: cols[0].trim(), hanzi: cols[1].trim(), pinyin: cols[2].trim(), meaning: cols[3].trim() });
-            }
+            if (cols.length >= 4) list.push({ id: cols[0].trim(), hanzi: cols[1].trim(), pinyin: cols[2].trim(), meaning: cols[3].trim() });
           }
           if (list.length > 0) words = list;
         }
       }).catch(() => {});
 
-    // THÔNG SỐ PHỐI CẢNH 2.5D (PERSPECTIVE)
-    const HORIZON_Y = 130;  // Đường chân trời (phía xa)
-    const BOTTOM_Y = 440;   // Chân màn hình (vị trí người chơi)
-    const HORIZON_WIDTH = 200; // Chiều rộng đường chạy ở xa
-    const BOTTOM_WIDTH = 680;  // Chiều rộng đường chạy ở gần
-    const CENTER_X = canvas.width / 2;
+    // ==========================================
+    // TOÁN HỌC PHỐI CẢNH 3D: KHỚP 100% ĐƯỜNG CHÂN TRỜI
+    // ==========================================
+    const HORIZON_Y = 120;     // Đường chân trời cố định
+    const FOCAL = 240;
+    const CAM_HEIGHT = 180;
+    const CENTER_X = canvas.width / 2; // 250
+    const PLAYER_Z = 90;
+    const LANE_WIDTH = 75;
 
-    // Tính toạ độ X và Scale theo phối cảnh 2.5D
-    // lane: -1 (trái), 0 (giữa), 1 (phải)
-    // z: 1.0 (ở xa tận chân trời) -> 0.0 (ở sát camera)
-    function getPerspective(lane, z) {
-      const progress = 1 - z; // 0 (xa) -> 1 (gần)
-      const currentWidth = HORIZON_WIDTH + (BOTTOM_WIDTH - HORIZON_WIDTH) * progress;
-      const y = HORIZON_Y + (BOTTOM_Y - HORIZON_Y) * progress;
-      const laneOffset = (lane * currentWidth) / 3;
-      const x = CENTER_X + laneOffset;
-      const scale = 0.22 + 0.78 * progress; // Tỉ lệ phóng to dần khi lại gần
+    function project3D(xw, z) {
+      const scale = FOCAL / z;
+      const y = HORIZON_Y + (CAM_HEIGHT * scale);
+      const x = CENTER_X + (xw * scale);
       return { x, y, scale };
     }
 
-    // NGƯỜI CHƠI
-    let player = {
-      lane: 0,           // -1: Trái, 0: Giữa, 1: Phải
-      visualLane: 0,     // Dùng để chuyển làn mượt
-      speed: 55,         // Tốc độ mặc định đồng đều
-      baseSpeed: 55,
-      boostTimer: 0,
-      stumbleTimer: 0,
-      distance: 0
+    // 3 KỴ SĨ TRÊN ĐƯỜNG ĐUA (Người chơi, Bạn bè hoặc NPC)
+    let racer1 = {
+      name: "Bạn (P1)", icon: "🏇", color: "#0984e3",
+      lane: 0, visualLane: 0, speed: 55, baseSpeed: 55,
+      boostTimer: 0, stumbleTimer: 0, distance: 0, isLocal: true
     };
 
-    // 2 NPC ĐỐI THỦ
-    let npc1 = { name: "A Cường", icon: "🐴", color: "#ff6b6b", distance: 0, speed: 53, lane: -1 };
-    let npc2 = { name: "Tiểu Hồ", icon: "🦄", color: "#feca57", distance: 0, speed: 55, lane: 1 };
+    let racer2 = {
+      name: "A Cường (NPC)", icon: "🐴", color: "#ff6b6b",
+      lane: -1, visualLane: -1, speed: 53, baseSpeed: 53,
+      boostTimer: 0, stumbleTimer: 0, distance: 0, isNPC: true,
+      boostCooldown: 340, steerCooldown: 0
+    };
 
-    // DANH SÁCH CHƯỚNG NGẠI VẬT
-    // Mỗi vật cản xuất hiện từ xa (z = 1.0) và trôi dần về người chơi (z = 0.0)
+    let racer3 = {
+      name: "Tiểu Hồ (NPC)", icon: "🦄", color: "#feca57",
+      lane: 1, visualLane: 1, speed: 55, baseSpeed: 55,
+      boostTimer: 0, stumbleTimer: 0, distance: 0, isNPC: true,
+      boostCooldown: 420, steerCooldown: 0
+    };
+
     let obstacles = [];
-    let obstacleTimer = 0;
-    let trackScroll = 0;
+    let maxTrackSpawned = 40;
 
-    // CÂU HỎI TRẮC NGHIỆM BỨT TỐC
     let quizActive = false;
     let quizTimer = 0;
     const QUIZ_DURATION = 260;
     let nextQuizCooldown = 150;
 
-    // ---------------- THIẾT LẬP MENU ----------------
-    function setTrackDist(dist, btn) {
-      TOTAL_RACE_DIST = dist;
-      document.querySelectorAll('#settingModal .choice-grid')[0].querySelectorAll('.choice-btn').forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
+    // ---------------- LOGIC KẾT NỐI MẠNG PEERJS ----------------
+    function openHostModal() {
+      document.getElementById('menuModal').style.display = 'none';
+      document.getElementById('hostModal').style.display = 'flex';
+
+      const randomCode = 'H' + Math.floor(1000 + Math.random() * 9000);
+      peer = new Peer(randomCode);
+
+      peer.on('open', id => {
+        document.getElementById('hostCodeDisplay').innerText = id;
+      });
+
+      peer.on('connection', connection => {
+        conn = connection;
+        isOnline = true;
+        isHost = true;
+        setupP2P();
+
+        document.getElementById('hostStatusMsg').innerText = "Bạn bè đã vào! Đang khởi động chặng đua...";
+        // Đổi racer 2 thành Bạn bè (P2), racer 3 giữ nguyên làm NPC lấp đầy phòng
+        racer2.name = "Bạn Bè (P2)";
+        racer2.isNPC = false;
+        racer2.isLocal = false;
+
+        setTimeout(() => {
+          document.getElementById('hostModal').style.display = 'none';
+          startRace();
+          conn.send({ type: 'START_RACE' });
+        }, 1200);
+      });
+
+      peer.on('error', err => alert("Lỗi: " + err));
     }
 
-    function setRank(key, btn) {
-      currentRank = RANK_CONFIGS[key];
-      document.querySelectorAll('#settingModal .choice-grid')[1].querySelectorAll('.choice-btn').forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
+    // Nếu bạn bè chưa vào, Host có thể bấm bắt đầu và lấp đầy toàn bộ slot bằng NPC
+    function hostStartWithBots() {
+      document.getElementById('hostModal').style.display = 'none';
+      startOfflineMode();
     }
 
-    function startGame() {
-      document.getElementById('settingModal').style.display = 'none';
-      document.getElementById('maxDistDisplay').innerText = TOTAL_RACE_DIST;
-      document.getElementById('badgeSettings').innerText = `${currentRank.title} • ${TOTAL_RACE_DIST}m`;
+    function openJoinModal() {
+      document.getElementById('menuModal').style.display = 'none';
+      document.getElementById('joinModal').style.display = 'flex';
+    }
 
-      npc1.speed = currentRank.base1;
-      npc2.speed = currentRank.base2;
+    function joinRoomAction() {
+      const code = document.getElementById('joinInput').value.trim().toUpperCase();
+      if (!code) return alert("Vui lòng nhập mã phòng!");
 
+      peer = new Peer();
+      peer.on('open', () => {
+        conn = peer.connect(code);
+        isOnline = true;
+        isHost = false;
+
+        conn.on('open', () => {
+          setupP2P();
+          document.getElementById('joinModal').style.display = 'none';
+          document.getElementById('badgeSettings').innerText = "Chế độ: Khách (P2)";
+
+          // Khách là racer2, điều khiển cục bộ
+          racer1.name = "Chủ Phòng (P1)";
+          racer1.isLocal = false;
+          racer2.name = "Bạn (P2)";
+          racer2.isLocal = true;
+          racer2.isNPC = false;
+        });
+      });
+
+      peer.on('error', err => alert("Không kết nối được phòng: " + err));
+    }
+
+    function setupP2P() {
+      conn.on('data', data => {
+        if (data.type === 'START_RACE') {
+          startRace();
+        } else if (data.type === 'SYNC_HOST_STATE') {
+          // Khách nhận đồng bộ từ Host
+          racer1.lane = data.r1.lane;
+          racer1.visualLane = data.r1.visualLane;
+          racer1.distance = data.r1.distance;
+          racer1.speed = data.r1.speed;
+          racer1.boostTimer = data.r1.boostTimer;
+          racer1.stumbleTimer = data.r1.stumbleTimer;
+
+          // Cập nhật NPC (Slot 3) từ Host
+          racer3.lane = data.r3.lane;
+          racer3.visualLane = data.r3.visualLane;
+          racer3.distance = data.r3.distance;
+          racer3.speed = data.r3.speed;
+          racer3.boostTimer = data.r3.boostTimer;
+          racer3.stumbleTimer = data.r3.stumbleTimer;
+
+          obstacles = data.obstacles;
+        } else if (data.type === 'SYNC_GUEST_STATE') {
+          // Host nhận vị trí từ Khách
+          racer2.lane = data.r2.lane;
+          racer2.visualLane = data.r2.visualLane;
+          racer2.distance = data.r2.distance;
+          racer2.speed = data.r2.speed;
+          racer2.boostTimer = data.r2.boostTimer;
+          racer2.stumbleTimer = data.r2.stumbleTimer;
+        } else if (data.type === 'END_RACE') {
+          finishRace();
+        }
+      });
+    }
+
+    function closeModal(id) {
+      document.getElementById(id).style.display = 'none';
+      document.getElementById('menuModal').style.display = 'flex';
+      if (peer) peer.destroy();
+    }
+
+    function startOfflineMode() {
+      document.getElementById('menuModal').style.display = 'none';
+      document.getElementById('badgeSettings').innerText = "Solo vs 2 NPC";
+      startRace();
+    }
+
+    function startRace() {
       gameStarted = true;
+      if (!isOnline) {
+        document.getElementById('badgeSettings').innerText = "Đua với 2 NPC";
+      } else {
+        document.getElementById('badgeSettings').innerText = isHost ? "Chủ Phòng (P1)" : "Khách (P2)";
+      }
+
+      // Đồng bộ mạng định kỳ
+      if (isOnline) {
+        setInterval(() => {
+          if (conn && conn.open) {
+            if (isHost) {
+              conn.send({
+                type: 'SYNC_HOST_STATE',
+                r1: { lane: racer1.lane, visualLane: racer1.visualLane, distance: racer1.distance, speed: racer1.speed, boostTimer: racer1.boostTimer, stumbleTimer: racer1.stumbleTimer },
+                r3: { lane: racer3.lane, visualLane: racer3.visualLane, distance: racer3.distance, speed: racer3.speed, boostTimer: racer3.boostTimer, stumbleTimer: racer3.stumbleTimer },
+                obstacles: obstacles
+              });
+            } else {
+              conn.send({
+                type: 'SYNC_GUEST_STATE',
+                r2: { lane: racer2.lane, visualLane: racer2.visualLane, distance: racer2.distance, speed: racer2.speed, boostTimer: racer2.boostTimer, stumbleTimer: racer2.stumbleTimer }
+              });
+            }
+          }
+        }, 50);
+      }
     }
 
-    // ---------------- ĐIỀU KHIỂN CHUYỂN LÀN ----------------
+    // ---------------- ĐIỀU KHIỂN CỤC BỘ ----------------
+    function getLocalRacer() {
+      return racer1.isLocal ? racer1 : racer2;
+    }
+
     window.addEventListener('keydown', e => {
       if (!gameStarted || gameEnded) return;
       const k = e.key.toLowerCase();
@@ -490,13 +629,15 @@
     document.getElementById('btnRight').addEventListener('touchstart', e => { e.preventDefault(); steerRight(); });
 
     function steerLeft() {
-      if (player.lane > -1) player.lane--;
+      const p = getLocalRacer();
+      if (p.lane > -1) p.lane--;
     }
     function steerRight() {
-      if (player.lane < 1) player.lane++;
+      const p = getLocalRacer();
+      if (p.lane < 1) p.lane++;
     }
 
-    // ---------------- HỆ THỐNG TRẮC NGHIỆM ----------------
+    // ---------------- TRẮC NGHIỆM BỨT TỐC ----------------
     function triggerQuiz() {
       if (quizActive || gameEnded || !gameStarted) return;
       quizActive = true;
@@ -528,14 +669,13 @@
       if (!quizActive) return;
       closeQuiz();
 
+      const p = getLocalRacer();
       if (isCorrect) {
-        // Trả lời đúng: Bứt tốc lên 115 km/h trong 4 giây (~240 frames)
-        player.boostTimer = 240;
+        p.boostTimer = 240; // 4 giây bứt tốc 115 km/h
       } else {
-        // Trả lời sai: Bị khựng nhẹ tốc độ
-        player.stumbleTimer = 50;
+        p.stumbleTimer = 45;
       }
-      nextQuizCooldown = 380 + Math.random() * 100; // 6-8 giây sau mới có câu tiếp
+      nextQuizCooldown = 380 + Math.random() * 100;
     }
 
     function closeQuiz() {
@@ -543,77 +683,109 @@
       document.getElementById('quizStrip').style.display = 'none';
     }
 
-    // ---------------- CẬP NHẬT LOGIC GAME ----------------
+    // ---------------- AI ĐIỀU KHIỂN NPC ----------------
+    function updateNPC(npc) {
+      if (!npc.isNPC) return;
+
+      if (npc.boostTimer > 0) {
+        npc.boostTimer--;
+        npc.speed = 115;
+      } else if (npc.stumbleTimer > 0) {
+        npc.stumbleTimer--;
+        npc.speed = 20;
+      } else {
+        const nVar = Math.sin(Date.now() * 0.002 + (npc.name.includes("Cường") ? 0 : 2)) * 4.5;
+        npc.speed = npc.baseSpeed + nVar;
+      }
+
+      npc.distance += (npc.speed / 3.6) / 60 * 1.5;
+      npc.visualLane += (npc.lane - npc.visualLane) * 0.18;
+      if (npc.steerCooldown > 0) npc.steerCooldown--;
+
+      // AI né rào cản
+      if (npc.steerCooldown <= 0) {
+        const threat = obstacles.find(obs => !obs.smashed && obs.lane === npc.lane && obs.dist > npc.distance + 8 && obs.dist < npc.distance + 24);
+        if (threat) {
+          if (Math.random() < 0.85) {
+            const candidateLanes = [-1, 0, 1].filter(l => l !== npc.lane);
+            npc.lane = candidateLanes[Math.floor(Math.random() * candidateLanes.length)];
+            npc.steerCooldown = 60;
+          }
+        }
+      }
+
+      // Va chạm rào cản của NPC
+      obstacles.forEach(obs => {
+        if (!obs.smashed && Math.abs(obs.dist - npc.distance) < 1.3 && Math.abs(npc.visualLane - obs.lane) < 0.45) {
+          if (npc.boostTimer > 0) {
+            obs.smashed = true;
+          } else {
+            obs.smashed = true;
+            npc.stumbleTimer = 45;
+            npc.speed = 20;
+          }
+        }
+      });
+
+      // Tự bứt tốc
+      npc.boostCooldown--;
+      if (npc.boostCooldown <= 0) {
+        npc.boostTimer = 180;
+        npc.boostCooldown = 380 + Math.random() * 200;
+      }
+    }
+
+    // ---------------- VÒNG LẶP UPDATE GAME ----------------
     function update() {
       if (!gameStarted || gameEnded) return;
 
-      // 1. Quản lý trạng thái tốc độ
-      if (player.boostTimer > 0) {
-        player.boostTimer--;
-        player.speed = 115; // Buff bứt tốc
-      } else if (player.stumbleTimer > 0) {
-        player.stumbleTimer--;
-        player.speed = 20;  // Bị chậm lại đáng kể khi tông rào
+      const localPlayer = getLocalRacer();
+
+      // Cập nhật người chơi cục bộ
+      if (localPlayer.boostTimer > 0) {
+        localPlayer.boostTimer--;
+        localPlayer.speed = 115;
+      } else if (localPlayer.stumbleTimer > 0) {
+        localPlayer.stumbleTimer--;
+        localPlayer.speed = 20;
       } else {
-        // Giữ đều tốc độ tiêu chuẩn (55 km/h), không cần bấm W/Space
-        player.speed = player.baseSpeed;
+        localPlayer.speed = localPlayer.baseSpeed;
       }
 
-      // Nội suy chuyển làn mượt mà
-      player.visualLane += (player.lane - player.visualLane) * 0.2;
+      localPlayer.visualLane += (localPlayer.lane - localPlayer.visualLane) * 0.22;
+      localPlayer.distance += (localPlayer.speed / 3.6) / 60 * 1.5;
 
-      // 2. Tính quãng đường chạy
-      const realSpeed = player.speed * 0.05;
-      player.distance += realSpeed;
+      // Chỉ Host hoặc Offline mới tính toán NPC & sinh rào cản
+      if (!isOnline || isHost) {
+        updateNPC(racer2);
+        updateNPC(racer3);
 
-      // 3. NPC chạy tự động theo rank đã chọn
-      const nVar1 = Math.sin(Date.now() * 0.002) * currentRank.variance;
-      const nVar2 = Math.cos(Date.now() * 0.0025) * currentRank.variance;
-      npc1.distance += (currentRank.base1 + nVar1) * 0.05;
-      npc2.distance += (currentRank.base2 + nVar2) * 0.05;
-
-      // 4. Sinh rào cản xuất hiện từ tít phía xa (z = 1.0)
-      obstacleTimer++;
-      if (obstacleTimer > 95) {
-        obstacleTimer = 0;
-        // Chọn ngẫu nhiên 1 hoặc 2 làn để đặt rào cản (luôn để trống ít nhất 1 làn)
-        const possibleLanes = [-1, 0, 1].sort(() => 0.5 - Math.random());
-        const obsLane = possibleLanes[0];
-        obstacles.push({
-          lane: obsLane,
-          z: 1.0 // Xuất phát ở đường chân trời phía xa
-        });
+        const leadDist = Math.max(racer1.distance, racer2.distance, racer3.distance);
+        while (maxTrackSpawned < leadDist + 110 && maxTrackSpawned < TOTAL_RACE_DIST - 60) {
+          maxTrackSpawned += 20 + Math.random() * 16;
+          obstacles.push({
+            lane: [-1, 0, 1].sort(() => 0.5 - Math.random())[0],
+            dist: maxTrackSpawned,
+            smashed: false
+          });
+        }
+        const trailDist = Math.min(racer1.distance, racer2.distance, racer3.distance);
+        obstacles = obstacles.filter(obs => obs.dist > trailDist - 15);
       }
 
-      // Di chuyển rào cản từ xa lại gần theo tốc độ của người chơi
-      for (let i = obstacles.length - 1; i >= 0; i--) {
-        const obs = obstacles[i];
-        // Tốc độ tiến lại gần tỷ lệ thuận với tốc độ người chơi
-        obs.z -= (player.speed * 0.00022 + 0.0055);
-
-        // Kiểm tra va chạm khi rào cản đến sát tầm vị trí người chơi (z ~ 0.05 -> -0.05)
-        if (obs.z <= 0.05 && obs.z >= -0.08) {
-          // Kiểm tra xem người chơi có đang ở làn này không
-          if (Math.abs(player.lane - obs.lane) < 0.5) {
-            if (player.boostTimer > 0) {
-              // Nếu đang bứt tốc thì phá hủy rào cản mà không hề bị chậm
-              obstacles.splice(i, 1);
-            } else {
-              // Bị vấp rào cản -> Làm chậm xe
-              player.stumbleTimer = 50;
-              obstacles.splice(i, 1);
-            }
-            continue;
+      // Va chạm rào cản của người chơi cục bộ
+      obstacles.forEach(obs => {
+        if (!obs.smashed && Math.abs(obs.dist - localPlayer.distance) < 1.3 && Math.abs(localPlayer.visualLane - obs.lane) < 0.45) {
+          if (localPlayer.boostTimer > 0) {
+            obs.smashed = true;
+          } else {
+            obs.smashed = true;
+            localPlayer.stumbleTimer = 45;
           }
         }
+      });
 
-        // Rào cản đi qua tầm nhìn phía dưới thì xoá
-        if (obs.z < -0.15) {
-          obstacles.splice(i, 1);
-        }
-      }
-
-      // 5. Đếm ngược câu hỏi trắc nghiệm
+      // Câu hỏi trắc nghiệm
       if (quizActive) {
         quizTimer--;
         const pct = (quizTimer / QUIZ_DURATION) * 100;
@@ -627,217 +799,246 @@
         if (nextQuizCooldown <= 0) triggerQuiz();
       }
 
-      // 6. Cập nhật UI
+      // UI HUD
       const speedBar = document.getElementById('speedBarFill');
-      const speedPct = Math.min(100, Math.round((player.speed / 115) * 100));
-      speedBar.style.width = speedPct + '%';
-      document.getElementById('speedVal').innerText = Math.round(player.speed) + ' km/h';
+      speedBar.style.width = `${Math.min(100, (localPlayer.speed / 115) * 100)}%`;
+      document.getElementById('speedVal').innerText = `${Math.round(localPlayer.speed)} km/h`;
+      if (localPlayer.boostTimer > 0) speedBar.className = 'speed-bar-fill boosted';
+      else if (localPlayer.stumbleTimer > 0) speedBar.className = 'speed-bar-fill slowed';
+      else speedBar.className = 'speed-bar-fill';
 
-      if (player.boostTimer > 0) {
-        speedBar.className = 'speed-bar-fill boosted';
-      } else if (player.stumbleTimer > 0) {
-        speedBar.className = 'speed-bar-fill slowed';
-      } else {
-        speedBar.className = 'speed-bar-fill';
-      }
+      document.getElementById('distDisplay').innerText = Math.min(TOTAL_RACE_DIST, Math.round(localPlayer.distance));
+      document.getElementById('markerP1').style.bottom = `${Math.min(100, (racer1.distance / TOTAL_RACE_DIST) * 100)}%`;
+      document.getElementById('markerP2').style.bottom = `${Math.min(100, (racer2.distance / TOTAL_RACE_DIST) * 100)}%`;
+      document.getElementById('markerP3').style.bottom = `${Math.min(100, (racer3.distance / TOTAL_RACE_DIST) * 100)}%`;
 
-      document.getElementById('distDisplay').innerText = Math.min(TOTAL_RACE_DIST, Math.round(player.distance));
-
-      // Cập nhật vị trí trên thanh tiến trình dọc
-      document.getElementById('markerP').style.bottom = `${Math.min(100, (player.distance / TOTAL_RACE_DIST) * 100)}%`;
-      document.getElementById('markerNpc1').style.bottom = `${Math.min(100, (npc1.distance / TOTAL_RACE_DIST) * 100)}%`;
-      document.getElementById('markerNpc2').style.bottom = `${Math.min(100, (npc2.distance / TOTAL_RACE_DIST) * 100)}%`;
-
-      // Kiểm tra cán đích
-      if (player.distance >= TOTAL_RACE_DIST || npc1.distance >= TOTAL_RACE_DIST || npc2.distance >= TOTAL_RACE_DIST) {
+      if (racer1.distance >= TOTAL_RACE_DIST || racer2.distance >= TOTAL_RACE_DIST || racer3.distance >= TOTAL_RACE_DIST) {
         finishRace();
+        if (isOnline && isHost && conn && conn.open) conn.send({ type: 'END_RACE' });
       }
     }
 
-    // ---------------- VẼ ĐỒ HOẠ PHỐI CẢNH 2.5D (DRAW) ----------------
+    // ==========================================
+    // VẼ ĐỒ HOẠ VỚI ĐƯỜNG CHÂN TRỜI KHỚP TUYỆT ĐỐI
+    // ==========================================
     function draw() {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-      // 1. Bầu trời & Đồi núi phía xa (Background)
+      // 1. Bầu trời đêm (0 đến HORIZON_Y)
       const skyGrad = ctx.createLinearGradient(0, 0, 0, HORIZON_Y);
-      skyGrad.addColorStop(0, "#1a252f");
-      skyGrad.addColorStop(1, "#2c3e50");
+      skyGrad.addColorStop(0, "#080c14");
+      skyGrad.addColorStop(1, "#1c2738");
       ctx.fillStyle = skyGrad;
       ctx.fillRect(0, 0, canvas.width, HORIZON_Y);
 
-      // Núi xa xăm
-      ctx.fillStyle = "#1e272e";
+      // Dãy núi phía xa kết thúc chuẩn xác tại HORIZON_Y
+      ctx.fillStyle = "#121924";
       ctx.beginPath();
       ctx.moveTo(0, HORIZON_Y);
-      ctx.lineTo(120, 65);
-      ctx.lineTo(260, HORIZON_Y);
-      ctx.lineTo(440, 50);
-      ctx.lineTo(600, HORIZON_Y);
-      ctx.lineTo(760, 70);
-      ctx.lineTo(760, HORIZON_Y);
+      ctx.lineTo(90, HORIZON_Y - 45);
+      ctx.lineTo(190, HORIZON_Y);
+      ctx.lineTo(320, HORIZON_Y - 50);
+      ctx.lineTo(440, HORIZON_Y);
+      ctx.lineTo(500, HORIZON_Y - 35);
+      ctx.lineTo(500, HORIZON_Y);
       ctx.fill();
 
-      // Thảm cỏ hai bên đường (Hình tam giác phối cảnh)
-      ctx.fillStyle = "#27ae60";
+      // Thảm cỏ hai bên bắt đầu chính xác từ HORIZON_Y trở xuống
+      ctx.fillStyle = "#1b4d3e";
       ctx.fillRect(0, HORIZON_Y, canvas.width, canvas.height - HORIZON_Y);
 
-      // 2. Mặt đường đua đất cát hình thang (Mở rộng về phía người xem)
-      const hLeft = CENTER_X - HORIZON_WIDTH / 2;
-      const hRight = CENTER_X + HORIZON_WIDTH / 2;
-      const bLeft = CENTER_X - BOTTOM_WIDTH / 2;
-      const bRight = CENTER_X + BOTTOM_WIDTH / 2;
+      // 2. MẶT ĐƯỜNG HÌNH THANG HỘI TỤ CHUẨN XÁC VÀO HORIZON_Y
+      const pRightNear = project3D(115, 75);
+      const pLeftNear  = project3D(-115, 75);
 
-      ctx.fillStyle = "#8d6e63";
+      ctx.fillStyle = "#6d4c41";
       ctx.beginPath();
-      ctx.moveTo(hLeft, HORIZON_Y);
-      ctx.lineTo(hRight, HORIZON_Y);
-      ctx.lineTo(bRight, BOTTOM_Y + 40);
-      ctx.lineTo(bLeft, BOTTOM_Y + 40);
+      // Hai điểm đỉnh đường đua cắm thẳng vào trục chân trời HORIZON_Y
+      ctx.moveTo(CENTER_X - 6, HORIZON_Y);
+      ctx.lineTo(CENTER_X + 6, HORIZON_Y);
+      ctx.lineTo(pRightNear.x, pRightNear.y);
+      ctx.lineTo(pLeftNear.x, pLeftNear.y);
       ctx.closePath();
       ctx.fill();
 
-      // Vạch phân 3 làn đường phối cảnh có vạch đứt cuộn theo tốc độ
-      trackScroll += player.speed * 0.08;
-      ctx.strokeStyle = "rgba(255, 255, 255, 0.4)";
-      ctx.lineWidth = 3;
-      ctx.setLineDash([18, 14]);
-      ctx.lineDashOffset = -trackScroll;
+      const localPlayer = getLocalRacer();
 
-      // 2 vạch chia làn
-      for (let l = -0.5; l <= 0.5; l += 1.0) {
-        const topPoint = getPerspective(l, 1.0);
-        const botPoint = getPerspective(l, 0.0);
+      // Viền lề đường sọc Đỏ - Trắng (Rumble Strips)
+      const curbOffset = (localPlayer.distance * 14) % 40;
+      for (let z = 1200 - curbOffset; z >= 76; z -= 38) {
+        const curNear = project3D(-115, z);
+        const curFar = project3D(-115, Math.max(76, z - 38));
+        const isRed = Math.floor(z / 38) % 2 === 0;
+        ctx.fillStyle = isRed ? "#e74c3c" : "#ecf0f1";
         ctx.beginPath();
-        ctx.moveTo(topPoint.x, topPoint.y);
-        ctx.lineTo(botPoint.x, botPoint.y + 40);
-        ctx.stroke();
+        ctx.moveTo(curNear.x - (8 * curNear.scale), curNear.y);
+        ctx.lineTo(curNear.x, curNear.y);
+        ctx.lineTo(curFar.x, curFar.y);
+        ctx.lineTo(curFar.x - (8 * curFar.scale), curFar.y);
+        ctx.fill();
+
+        const curRNear = project3D(115, z);
+        const curRFar = project3D(115, Math.max(76, z - 38));
+        ctx.beginPath();
+        ctx.moveTo(curRNear.x, curRNear.y);
+        ctx.lineTo(curRNear.x + (8 * curRNear.scale), curRNear.y);
+        ctx.lineTo(curRFar.x + (8 * curRFar.scale), curRFar.y);
+        ctx.lineTo(curRFar.x, curRFar.y);
+        ctx.fill();
       }
-      ctx.setLineDash([]); // Reset line dash
 
-      // 3. Vẽ chướng ngại vật (Sắp xếp theo thứ tự z từ xa tới gần để vẽ đè tự nhiên)
-      const sortedObstacles = [...obstacles].sort((a, b) => b.z - a.z);
-      sortedObstacles.forEach(obs => {
-        const pos = getPerspective(obs.lane, obs.z);
-        drawPerspectiveBarrier(pos.x, pos.y, pos.scale);
+      // Vạch phân làn: Bắt đầu từ HORIZON_Y kéo dài ra
+      ctx.strokeStyle = "rgba(255, 255, 255, 0.45)";
+      ctx.lineWidth = 2.5;
+      ctx.setLineDash([20, 16]);
+      ctx.lineDashOffset = -localPlayer.distance * 14;
+
+      [-0.5, 0.5].forEach(l => {
+        const botP = project3D(l * LANE_WIDTH, 75);
+        ctx.beginPath();
+        ctx.moveTo(CENTER_X + (l * 4), HORIZON_Y); // Chạm đúng đỉnh chân trời
+        ctx.lineTo(botP.x, botP.y);
+        ctx.stroke();
       });
+      ctx.setLineDash([]);
 
-      // 4. Vẽ 2 NPC đối thủ theo vị trí quãng đường
-      [npc1, npc2].forEach(npc => {
-        const distDiff = npc.distance - player.distance;
-        // distDiff trong khoảng [-40m, 120m] thì hiển thị trên màn hình phối cảnh
-        if (distDiff > -35 && distDiff < 140) {
-          // Quy đổi khoảng cách mét thành độ sâu z (0.0: ngang người chơi, 1.0: phía xa)
-          const z = Math.max(0, Math.min(1.0, 1 - (distDiff + 35) / 175));
-          const pos = getPerspective(npc.lane, z);
-          drawPerspectiveHorse(pos.x, pos.y, pos.scale, npc.color, npc.icon, npc.name, false, false);
+      // 3. DANH SÁCH VẬT THỂ THEO CHIỀU SÂU Z
+      let renderList = [];
+
+      // Hàng cây 2 bên
+      const TREE_SPACING = 100;
+      const treeOffset = (localPlayer.distance * 14) % TREE_SPACING;
+      for (let z = 1200 - treeOffset; z >= 76; z -= TREE_SPACING) {
+        renderList.push({ type: 'tree', xw: -160, z: z });
+        renderList.push({ type: 'tree', xw: 160, z: z });
+      }
+
+      // Rào cản
+      obstacles.forEach(obs => {
+        if (!obs.smashed) {
+          const distDiff = obs.dist - localPlayer.distance;
+          const z = PLAYER_Z + (distDiff * 14);
+          if (z >= 76 && z <= 1200) {
+            renderList.push({ type: 'barrier', xw: obs.lane * LANE_WIDTH, z: z });
+          }
         }
       });
 
-      // 5. Vẽ Người chơi (Luôn cố định ở đáy màn hình z = 0)
-      const playerPos = getPerspective(player.visualLane, 0.0);
-      drawPerspectiveHorse(
-        playerPos.x,
-        playerPos.y,
-        playerPos.scale,
-        "#0984e3",
-        "🏇",
-        "Bạn (Player)",
-        player.boostTimer > 0,
-        player.stumbleTimer > 0
-      );
+      // 2 đối thủ còn lại
+      [racer1, racer2, racer3].forEach(r => {
+        if (r !== localPlayer) {
+          const distDiff = r.distance - localPlayer.distance;
+          const z = PLAYER_Z + (distDiff * 14);
+          if (z >= 76 && z <= 1200) {
+            renderList.push({ type: 'horse', xw: r.visualLane * LANE_WIDTH, z: z, data: r });
+          }
+        }
+      });
+
+      renderList.sort((a, b) => b.z - a.z);
+
+      renderList.forEach(item => {
+        const pos = project3D(item.xw, item.z);
+        if (item.type === 'tree') drawPerspectiveTree(pos.x, pos.y, pos.scale);
+        else if (item.type === 'barrier') drawPerspectiveBarrier(pos.x, pos.y, pos.scale);
+        else if (item.type === 'horse') {
+          drawPerspectiveHorse(pos.x, pos.y, pos.scale, item.data.color, item.data.icon, item.data.name, item.data.boostTimer > 0, item.data.stumbleTimer > 0);
+        }
+      });
+
+      // 4. VẼ NGƯỜI CHƠI CỤC BỘ
+      const pPos = project3D(localPlayer.visualLane * LANE_WIDTH, PLAYER_Z);
+      drawPerspectiveHorse(pPos.x, pPos.y, pPos.scale, localPlayer.color, localPlayer.icon, localPlayer.name, localPlayer.boostTimer > 0, localPlayer.stumbleTimer > 0);
     }
 
-    // Hàm vẽ hàng rào theo tỷ lệ phối cảnh
+    function drawPerspectiveTree(x, y, scale) {
+      ctx.save();
+      ctx.translate(x, y);
+      ctx.scale(scale, scale);
+
+      ctx.fillStyle = "rgba(0, 0, 0, 0.4)";
+      ctx.beginPath(); ctx.ellipse(0, 6, 22, 8, 0, 0, Math.PI * 2); ctx.fill();
+
+      ctx.fillStyle = "#5d4037";
+      ctx.fillRect(-5, -28, 10, 32);
+
+      ctx.fillStyle = "#2e7d32";
+      ctx.beginPath(); ctx.arc(0, -32, 20, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = "#388e3c";
+      ctx.beginPath(); ctx.arc(0, -44, 16, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = "#4caf50";
+      ctx.beginPath(); ctx.arc(0, -56, 11, 0, Math.PI * 2); ctx.fill();
+
+      ctx.restore();
+    }
+
     function drawPerspectiveBarrier(x, y, scale) {
       ctx.save();
       ctx.translate(x, y);
       ctx.scale(scale, scale);
 
-      // Thân rào gỗ
+      ctx.fillStyle = "rgba(0,0,0,0.55)";
+      ctx.beginPath(); ctx.ellipse(0, 5, 42, 8, 0, 0, Math.PI * 2); ctx.fill();
+
+      ctx.fillStyle = "#3e2723";
+      ctx.fillRect(-32, -22, 8, 26);
+      ctx.fillRect(24, -22, 8, 26);
+
       ctx.fillStyle = "#d35400";
-      ctx.beginPath();
-      ctx.roundRect(-60, -18, 120, 26, 6);
-      ctx.fill();
-      ctx.strokeStyle = "#fff";
-      ctx.lineWidth = 2.5;
-      ctx.stroke();
+      ctx.beginPath(); ctx.roundRect(-40, -32, 80, 18, 3); ctx.fill();
+      ctx.strokeStyle = "#fff"; ctx.lineWidth = 1.8; ctx.stroke();
 
-      // Sọc phản quang vàng
       ctx.fillStyle = "#f1c40f";
-      ctx.fillRect(-45, -18, 18, 26);
-      ctx.fillRect(-5, -18, 18, 26);
-      ctx.fillRect(35, -18, 18, 26);
+      ctx.fillRect(-28, -32, 11, 18);
+      ctx.fillRect(-5, -32, 11, 18);
+      ctx.fillRect(18, -32, 11, 18);
 
-      // Chân đỡ rào
-      ctx.fillStyle = "#5d4037";
-      ctx.fillRect(-55, 8, 14, 16);
-      ctx.fillRect(41, 8, 14, 16);
-
-      ctx.fillStyle = "#fff";
-      ctx.font = "bold 13px sans-serif";
+      ctx.fillStyle = "#fff"; ctx.font = "bold 10px sans-serif";
       ctx.textAlign = "center";
-      ctx.fillText("🚧 RÀO CẢN", 0, 0);
+      ctx.fillText("🚧 RÀO", 0, -20);
 
       ctx.restore();
     }
 
-    // Hàm vẽ ngựa theo tỷ lệ phóng to thu nhỏ
     function drawPerspectiveHorse(x, y, scale, color, icon, name, isBoosted, isStumbled) {
       ctx.save();
       ctx.translate(x, y);
       ctx.scale(scale, scale);
 
-      // Vòng sáng bứt tốc
       if (isBoosted) {
-        ctx.shadowColor = "#00d2d3";
+        ctx.shadowColor = "#ff9f43";
         ctx.shadowBlur = 25;
-        ctx.fillStyle = "rgba(0, 210, 211, 0.35)";
-        ctx.beginPath();
-        ctx.ellipse(0, 0, 52, 64, 0, 0, Math.PI * 2);
-        ctx.fill();
+        ctx.fillStyle = "rgba(255, 159, 67, 0.4)";
+        ctx.beginPath(); ctx.ellipse(0, -10, 46, 54, 0, 0, Math.PI * 2); ctx.fill();
       }
 
-      // Bóng dưới chân
-      ctx.fillStyle = "rgba(0,0,0,0.4)";
-      ctx.beginPath();
-      ctx.ellipse(0, 26, 30, 10, 0, 0, Math.PI * 2);
-      ctx.fill();
+      ctx.fillStyle = "rgba(0,0,0,0.45)";
+      ctx.beginPath(); ctx.ellipse(0, 14, 28, 9, 0, 0, Math.PI * 2); ctx.fill();
 
-      // Thân ngựa
       ctx.fillStyle = isStumbled ? "#7f8c8d" : color;
-      ctx.beginPath();
-      ctx.ellipse(0, 0, 24, 38, 0, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.strokeStyle = "#fff";
-      ctx.lineWidth = 2.5;
-      ctx.stroke();
+      ctx.beginPath(); ctx.ellipse(0, -5, 18, 30, 0, 0, Math.PI * 2); ctx.fill();
+      ctx.strokeStyle = "#fff"; ctx.lineWidth = 2; ctx.stroke();
 
-      // Đầu ngựa
-      ctx.beginPath();
-      ctx.ellipse(0, -36, 14, 18, 0, 0, Math.PI * 2);
-      ctx.fill();
+      ctx.beginPath(); ctx.ellipse(0, -34, 11, 14, 0, 0, Math.PI * 2); ctx.fill();
 
-      // Biểu tượng Kỵ sĩ
-      ctx.font = "30px sans-serif";
+      ctx.font = "24px sans-serif";
       ctx.textAlign = "center";
-      ctx.fillText(icon, 0, 8);
+      ctx.fillText(icon, 0, 3);
 
-      // Tên nhân vật
-      ctx.fillStyle = "#fff";
-      ctx.font = "bold 12px sans-serif";
-      ctx.fillText(name, 0, -55);
+      ctx.fillStyle = "#fff"; ctx.font = "bold 11px sans-serif";
+      ctx.fillText(name, 0, -48);
 
-      // Cảnh báo khi bị vấp rào
-      if (isStumbled) {
-        ctx.fillStyle = "#e74c3c";
-        ctx.font = "bold 14px sans-serif";
-        ctx.fillText("💥 CHẬM LẠI!", 0, -72);
+      if (isBoosted) {
+        ctx.fillStyle = "#feca57"; ctx.font = "bold 12px sans-serif";
+        ctx.fillText("⚡ BỨT TỐC!", 0, -62);
+      } else if (isStumbled) {
+        ctx.fillStyle = "#e74c3c"; ctx.font = "bold 12px sans-serif";
+        ctx.fillText("💥 VẤP RÀO!", 0, -62);
       }
 
       ctx.restore();
     }
 
-    // VÒNG LẶP CHÍNH (GAME LOOP)
     function loop() {
       update();
       draw();
@@ -845,34 +1046,34 @@
     }
     requestAnimationFrame(loop);
 
-    // KẾT THÚC CHẶNG ĐUA
+    // ---------------- TỔNG KẾT ----------------
     function finishRace() {
       gameEnded = true;
       closeQuiz();
 
       const contestants = [
-        { name: "Bạn (Player)", dist: player.distance },
-        { name: "A Cường (NPC)", dist: npc1.distance },
-        { name: "Tiểu Hồ (NPC)", dist: npc2.distance }
+        { name: racer1.name, dist: racer1.distance },
+        { name: racer2.name, dist: racer2.distance },
+        { name: racer3.name, dist: racer3.distance }
       ].sort((a, b) => b.dist - a.dist);
 
-      const pRank = contestants.findIndex(c => c.name.includes("Bạn")) + 1;
+      const localName = getLocalRacer().name;
+      const rank = contestants.findIndex(c => c.name === localName) + 1;
 
       document.getElementById('endModal').style.display = 'flex';
       const endTitle = document.getElementById('endTitle');
       const endDetails = document.getElementById('endDetails');
 
-      if (pRank === 1) {
-        endTitle.innerText = "🏆 HẠNG 1: CHIẾN THẮNG TUYỆT ĐỐI!";
+      if (rank === 1) {
+        endTitle.innerText = "🏆 HẠNG 1: VÔ ĐỊCH ĐƯỜNG ĐUA!";
         endTitle.style.color = "#00d2d3";
       } else {
-        endTitle.innerText = `🥈 HẠNG ${pRank}: CỐ GẮNG Ở CHẶNG SAU!`;
+        endTitle.innerText = `🥈 HẠNG ${rank}: CỐ GẮNG Ở VÒNG SAU!`;
         endTitle.style.color = "#feca57";
       }
 
       endDetails.innerHTML = `
-        <b>Độ khó:</b> Rank ${currentRank.title} • Chặng ${TOTAL_RACE_DIST}m<br><br>
-        <b>Bảng xếp hạng chung cuộc:</b><br>
+        <b>Bảng xếp hạng chung cuộc:</b><br><br>
         1. ${contestants[0].name} - ${Math.round(contestants[0].dist)}m<br>
         2. ${contestants[1].name} - ${Math.round(contestants[1].dist)}m<br>
         3. ${contestants[2].name} - ${Math.round(contestants[2].dist)}m
