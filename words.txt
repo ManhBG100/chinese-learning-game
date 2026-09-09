@@ -1,0 +1,6 @@
+id	hanzi	pinyin	meaning
+1	你好	nǐ hǎo	Xin chào
+2	谢谢	xièxie	Cảm ơn
+3	再见	zàijiàn	Tạm biệt
+4	苹果	píngguǒ	Quả táo
+5	学习	xuéxí	Học tập
