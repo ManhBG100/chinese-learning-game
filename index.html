@@ -3,80 +3,123 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Chinese Learning Game</title>
+  <title>Chinese Learning App</title>
+  <!-- Lấy font chữ Nunito cho giống các app học tập -->
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800;900&display=swap" rel="stylesheet">
+  
   <style>
     * {
       box-sizing: border-box;
       margin: 0;
       padding: 0;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      font-family: 'Nunito', sans-serif; /* Đổi font thân thiện */
     }
 
     body {
-      background-color: #121212;
-      color: #ffffff;
+      background-color: #F7F9FC; /* Màu nền xám xanh sáng nhẹ nhàng */
+      color: #3C4A5A;
       min-height: 100vh;
       display: flex;
-      flex-direction: column;
-      align-items: center;
       justify-content: center;
+      align-items: center;
+      padding: 20px;
+    }
+
+    /* Khung chính chứa toàn bộ nội dung */
+    .app-container {
+      display: flex;
+      flex-direction: row-reverse; /* Đảo ngược để Tiêu đề nằm bên phải */
+      align-items: center;
+      justify-content: space-between;
+      max-width: 900px;
+      width: 100%;
+      gap: 40px;
+    }
+
+    /* TIÊU ĐỀ LỆCH PHẢI */
+    .title-section {
+      flex: 1;
+      text-align: right;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
     }
 
     .main-title {
-      font-size: 42px;
-      letter-spacing: 2px;
-      margin-bottom: 50px;
-      text-transform: uppercase;
-      color: #00d2d3;
-      text-shadow: 0 0 15px rgba(0, 210, 211, 0.4);
+      font-size: 54px;
+      font-weight: 900;
+      line-height: 1.1;
+      color: #3C4A5A;
+      margin-bottom: 10px;
     }
 
-    /* Khung chứa các nút điều hướng */
+    .main-title .highlight {
+      color: #58CC02; /* Màu xanh lá đặc trưng của app học tập */
+    }
+
+    .subtitle {
+      font-size: 20px;
+      color: #778597;
+      font-weight: 700;
+      margin-bottom: 20px;
+    }
+
+    .mascot-icon {
+      font-size: 80px;
+      animation: bounce 2s infinite ease-in-out;
+    }
+
+    /* KHUNG MENU BÊN TRÁI */
     .menu-container {
+      flex: 1;
       display: flex;
       flex-direction: column;
-      gap: 20px;
+      gap: 15px;
       width: 100%;
-      max-width: 320px;
+      max-width: 350px;
     }
 
+    /* STYLE NÚT BẤM (Giống App) */
     .menu-btn {
-      background: #1e1e1e;
-      color: #ffffff;
-      border: 1px solid #333333;
-      padding: 16px;
+      background: #FFFFFF;
+      color: #1CB0F6; /* Chữ xanh dương */
+      border: 2px solid #E5E5E5;
+      border-bottom-width: 4px; /* Tạo hiệu ứng nổi 3D */
+      padding: 16px 20px;
       font-size: 18px;
-      font-weight: 600;
-      letter-spacing: 1px;
-      border-radius: 8px;
+      font-weight: 800;
+      border-radius: 16px; /* Bo góc tròn nhiều */
       cursor: pointer;
       text-transform: uppercase;
-      transition: all 0.25s ease;
+      letter-spacing: 0.5px;
+      transition: all 0.1s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
     }
 
-    .menu-btn:hover {
-      background: #2a2a2a;
-      border-color: #00d2d3;
-      color: #00d2d3;
-      transform: translateY(-2px);
-      box-shadow: 0 4px 15px rgba(0, 210, 211, 0.2);
+    .menu-btn.primary {
+      background: #58CC02;
+      color: white;
+      border-color: #58CC02;
+      border-bottom-color: #46A302; /* Viền dưới màu đậm hơn */
+    }
+
+    .menu-btn:active:not(.disabled) {
+      transform: translateY(2px);
+      border-bottom-width: 2px; /* Hiệu ứng lún xuống khi bấm */
+      margin-top: 2px;
     }
 
     .menu-btn.disabled {
-      opacity: 0.5;
+      background: #E5E5E5;
+      color: #AFAFAF;
+      border-color: #E5E5E5;
       cursor: not-allowed;
-      border-color: #262626;
     }
 
-    .menu-btn.disabled:hover {
-      background: #1e1e1e;
-      color: #ffffff;
-      border-color: #262626;
-      transform: none;
-      box-shadow: none;
-    }
-
-    /* Modal danh sách Game hiện lên khi bấm Game Option */
+    /* MODAL DANH SÁCH GAME */
     .modal-overlay {
       display: none;
       position: fixed;
@@ -84,89 +127,137 @@
       left: 0;
       width: 100%;
       height: 100%;
-      background: rgba(0, 0, 0, 0.8);
+      background: rgba(0, 0, 0, 0.4);
       justify-content: center;
       align-items: center;
-      backdrop-filter: blur(4px);
+      backdrop-filter: blur(3px);
+      z-index: 100;
     }
 
     .modal-box {
-      background: #1e1e1e;
-      border: 1px solid #333;
-      border-radius: 12px;
+      background: #FFFFFF;
+      border-radius: 24px;
       padding: 30px;
       width: 90%;
-      max-width: 400px;
+      max-width: 450px;
       text-align: center;
-      position: relative;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+      animation: popUp 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     }
 
     .modal-box h2 {
       font-size: 24px;
+      font-weight: 800;
       margin-bottom: 25px;
-      color: #ff9f43;
+      color: #3C4A5A;
     }
 
     .game-list {
       display: flex;
       flex-direction: column;
-      gap: 15px;
+      gap: 12px;
     }
 
     .game-link {
       display: block;
-      background: #2d3436;
-      color: #fff;
-      padding: 14px;
-      border-radius: 6px;
+      background: #F7F9FC;
+      color: #3C4A5A;
+      padding: 16px;
+      border-radius: 16px;
       text-decoration: none;
-      font-weight: 500;
-      border: 1px solid #485460;
-      transition: 0.2s;
+      font-weight: 700;
+      border: 2px solid #E5E5E5;
+      border-bottom-width: 4px;
+      transition: all 0.1s ease;
+      text-align: left;
     }
 
     .game-link:hover {
-      background: #00d2d3;
-      color: #121212;
-      font-weight: bold;
+      background: #DDF4FF;
+      border-color: #1CB0F6;
+      border-bottom-color: #1899D6;
+      color: #1CB0F6;
+    }
+
+    .game-link:active {
+      transform: translateY(2px);
+      border-bottom-width: 2px;
     }
 
     .close-btn {
       margin-top: 25px;
-      background: transparent;
-      border: 1px solid #555;
-      color: #aaa;
-      padding: 8px 20px;
-      border-radius: 4px;
+      background: #FF4B4B;
+      color: white;
+      border: none;
+      border-bottom: 4px solid #EA2B2B;
+      padding: 14px 0;
+      border-radius: 16px;
+      font-weight: 800;
+      font-size: 16px;
       cursor: pointer;
+      width: 100%;
+      text-transform: uppercase;
+      transition: all 0.1s ease;
     }
 
-    .close-btn:hover {
-      color: #fff;
-      border-color: #fff;
+    .close-btn:active {
+      transform: translateY(2px);
+      border-bottom-width: 0px;
+    }
+
+    /* Hiệu ứng chuyển động */
+    @keyframes bounce {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-10px); }
+    }
+
+    @keyframes popUp {
+      from { transform: scale(0.8); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
+    }
+
+    /* Responsive cho điện thoại */
+    @media (max-width: 768px) {
+      .app-container {
+        flex-direction: column; /* Đổi về cột trên màn nhỏ */
+        text-align: center;
+      }
+      
+      .title-section {
+        align-items: center;
+        text-align: center;
+      }
     }
   </style>
 </head>
 <body>
 
-  <h1 class="main-title">Chinese Game</h1>
+  <div class="app-container">
+    <!-- Phần Tiêu Đề bên phải -->
+    <div class="title-section">
+      <div class="mascot-icon">🐼</div>
+      <h1 class="main-title">Học Hán Tự<br><span class="highlight">Dễ Dàng!</span></h1>
+      <p class="subtitle">Vừa chơi vừa học mỗi ngày</p>
+    </div>
 
-  <div class="menu-container">
-    <button class="menu-btn" onclick="openGameModal()">Game Option</button>
-    <button class="menu-btn disabled" title="Chức năng đang cập nhật">Data</button>
-    <button class="menu-btn disabled" title="Chức năng đang cập nhật">Contact Us</button>
+    <!-- Phần Nút bấm bên trái -->
+    <div class="menu-container">
+      <button class="menu-btn primary" onclick="openGameModal()">🎮 Bắt đầu ngay</button>
+      <button class="menu-btn disabled" title="Chức năng đang cập nhật">📊 Thống kê</button>
+      <button class="menu-btn disabled" title="Chức năng đang cập nhật">✉️ Liên hệ</button>
+    </div>
   </div>
 
   <!-- Popup hiển thị các Mini-game -->
   <div class="modal-overlay" id="gameModal">
     <div class="modal-box">
-      <h2>Danh Sách Trò Chơi</h2>
+      <h2>Chọn Bài Tập 🎯</h2>
       <div class="game-list">
-        <a href="./minigames/quiz.html" class="game-link">1. Trắc Nghiệm Hán Tự</a>
-        <a href="./minigames/draw.html" class="game-link">2. Quick Draw Hán Tự (Tập Vẽ Chữ)</a>
-        <a href="./minigames/fishing.html" class="game-link">3. Câu con mẹ nó cá</a>
-        <a href="./minigames/horse_racing.html" class="game-link">3. Đua con mẹ nó ngựa</a>
-        <a href="./minigames/exam_cheat.html" class="game-link">4. Quay con mẹ nó cóp</a>
+        <a href="./minigames/quiz.html" class="game-link">📝 1. Trắc Nghiệm Hán Tự</a>
+        <a href="./minigames/draw.html" class="game-link">✍️ 2. Luyện Viết (Quick Draw)</a>
+        <a href="./minigames/fishing.html" class="game-link">🎣 3. Trò Chơi Câu Cá</a>
+        <a href="./minigames/horse_racing.html" class="game-link">🐎 4. Đua Ngựa Hán Tự</a>
+        <a href="./minigames/exam_cheat.html" class="game-link">🕵️ 5. Thử Thách Vượt Kỳ Thi</a>
       </div>
       <button class="close-btn" onclick="closeGameModal()">Đóng</button>
     </div>
@@ -181,7 +272,7 @@
       document.getElementById('gameModal').style.display = 'none';
     }
 
-    // Đóng popup khi click ra ngoài vùng đen
+    // Đóng popup khi click ra ngoài vùng xám
     window.onclick = function(event) {
       const modal = document.getElementById('gameModal');
       if (event.target === modal) {
