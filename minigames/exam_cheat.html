@@ -1,1 +1,428 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Giờ Kiểm Tra (Red Light, Green Light)</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, sans-serif; }
+    body {
+      background-color: #2c3e50;
+      color: #333;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      overflow: hidden;
+      user-select: none;
+    }
 
+    /* Thanh điều hướng và Thông tin */
+    .top-bar {
+      width: 100%;
+      max-width: 600px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 15px;
+      color: white;
+    }
+    .btn-back { color: #00d2d3; text-decoration: none; font-weight: bold; font-size: 16px; }
+
+    /* Thanh tiến độ bài thi */
+    .progress-container {
+      width: 100%;
+      max-width: 600px;
+      background: #1e272e;
+      border-radius: 10px;
+      margin: 10px 0 20px;
+      border: 2px solid #575fcf;
+      position: relative;
+      height: 25px;
+    }
+    .progress-bar {
+      height: 100%;
+      background: linear-gradient(90deg, #0be881, #0fb9b1);
+      width: 0%;
+      border-radius: 8px;
+      transition: width 0.3s;
+    }
+    .progress-text {
+      position: absolute;
+      top: 2px;
+      width: 100%;
+      text-align: center;
+      color: white;
+      font-weight: bold;
+      font-size: 14px;
+      text-shadow: 1px 1px 2px black;
+    }
+
+    /* Bục giáo viên */
+    .teacher-desk {
+      width: 100%;
+      max-width: 600px;
+      background: #8b5a2b;
+      border-radius: 15px 15px 0 0;
+      padding: 30px;
+      text-align: center;
+      position: relative;
+      border-bottom: 5px solid #5c3a21;
+      box-shadow: 0 10px 20px rgba(0,0,0,0.5);
+    }
+    .teacher-sprite {
+      font-size: 80px;
+      transition: transform 0.2s;
+    }
+    .alert-icon {
+      position: absolute;
+      top: 10px;
+      right: 30%;
+      font-size: 40px;
+      color: #ff3f34;
+      display: none;
+      animation: pop 0.3s ease-out;
+    }
+
+    /* Bàn học sinh (Người chơi) */
+    .student-desk {
+      width: 100%;
+      max-width: 600px;
+      background: #d1d8e0;
+      padding: 40px 20px;
+      border-radius: 0 0 15px 15px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 20px;
+      box-shadow: 0 -5px 15px rgba(0,0,0,0.2);
+    }
+    .exam-paper {
+      background: white;
+      width: 80%;
+      height: 120px;
+      border: 1px solid #ccc;
+      box-shadow: 2px 2px 8px rgba(0,0,0,0.1);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 18px;
+      color: #7f8ca6;
+      border-radius: 4px;
+    }
+    .btn-cheat {
+      background: #ff5e57;
+      color: white;
+      border: none;
+      padding: 15px 30px;
+      font-size: 20px;
+      font-weight: bold;
+      border-radius: 10px;
+      cursor: pointer;
+      box-shadow: 0 6px #ff3f34;
+      transition: 0.1s;
+    }
+    .btn-cheat:active {
+      transform: translateY(4px);
+      box-shadow: 0 2px #ff3f34;
+    }
+
+    /* Modal Phao Thi */
+    .cheat-modal {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0, 0, 0, 0.85);
+      justify-content: center;
+      align-items: center;
+      z-index: 100;
+    }
+    .cheat-paper {
+      background: #fffdf0;
+      width: 90%;
+      max-width: 400px;
+      padding: 25px;
+      border-radius: 8px;
+      text-align: center;
+      box-shadow: 0 0 30px rgba(255, 255, 255, 0.2);
+      border: 2px dashed #dcdde1;
+      position: relative;
+    }
+    .hanzi-box { font-size: 45px; font-weight: bold; color: #2f3640; margin-bottom: 5px; }
+    .pinyin-box { color: #e1b12c; font-size: 18px; margin-bottom: 20px; }
+    .options-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px; }
+    .opt-btn {
+      background: #f5f6fa; color: #2f3640; border: 2px solid #dcdde1;
+      padding: 12px; border-radius: 8px; cursor: pointer; font-size: 15px; font-weight: 600;
+    }
+    .opt-btn:hover { background: #dcdde1; }
+    .btn-hide {
+      background: #1e272e; color: white; border: none; padding: 12px 20px;
+      border-radius: 8px; font-weight: bold; cursor: pointer; width: 100%;
+      font-size: 16px;
+    }
+
+    /* Hoạt ảnh */
+    @keyframes pop {
+      0% { transform: scale(0.5); opacity: 0; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      25% { transform: translateX(-10px); }
+      50% { transform: translateX(10px); }
+      75% { transform: translateX(-10px); }
+    }
+    .shaking { animation: shake 0.4s; }
+
+    /* Màn kết thúc */
+    .end-modal {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0, 0, 0, 0.9);
+      justify-content: center;
+      align-items: center;
+      z-index: 200;
+      color: white;
+      text-align: center;
+    }
+    .end-box h1 { font-size: 40px; margin-bottom: 10px; color: #0be881; }
+    .end-btn { margin-top: 20px; padding: 10px 20px; font-size: 18px; cursor: pointer; }
+  </style>
+</head>
+<body>
+
+  <div class="top-bar">
+    <a href="../index.html" class="btn-back">← Về Hub</a>
+    <div style="font-weight: bold;">Môn: Hán Tự (15 Phút)</div>
+  </div>
+
+  <div class="progress-container">
+    <div class="progress-bar" id="progressBar"></div>
+    <div class="progress-text">Tiến độ bài thi: <span id="progressText">0</span>%</div>
+  </div>
+
+  <!-- Khu vực Giáo viên -->
+  <div class="teacher-desk" id="teacherDesk">
+    <div class="alert-icon" id="alertIcon">❗</div>
+    <div class="teacher-sprite" id="teacherSprite">👩‍🏫📰</div>
+    <div style="color: white; margin-top: 10px; font-weight: bold;" id="teacherStatus">Cô đang đọc báo...</div>
+  </div>
+
+  <!-- Khu vực Học sinh -->
+  <div class="student-desk">
+    <div class="exam-paper" id="examPaper">
+      (Đề thi trắng tinh... Phải mở phao thôi!)
+    </div>
+    <button class="btn-cheat" onclick="openCheatSheet()">👀 MỞ PHAO THI</button>
+    <p style="font-size: 13px; color: #7f8ca6; text-align: center;">Mở phao để trả lời câu hỏi. <br>Nhớ gập phao trước khi cô giáo nhìn xuống!</p>
+  </div>
+
+  <!-- Phao Thi (Modal Câu hỏi) -->
+  <div class="cheat-modal" id="cheatModal">
+    <div class="cheat-paper">
+      <h3 style="color: #c23616; margin-bottom: 15px;">📜 Phao Nháp</h3>
+      <div class="hanzi-box" id="targetHanzi">...</div>
+      <div class="pinyin-box" id="targetPinyin">...</div>
+      <div class="options-grid" id="quizOptions"></div>
+      <button class="btn-hide" onclick="closeCheatSheet()">⬇️ GẬP PHAO NGAY! (Phím ESC)</button>
+    </div>
+  </div>
+
+  <!-- Kết thúc game -->
+  <div class="end-modal" id="endModal">
+    <div class="end-box">
+      <h1 id="endTitle">Hoàn Thành Bài Thi!</h1>
+      <p id="endDesc">Bạn đã lén lút quay cóp thành công 100%.</p>
+      <button class="btn-hide end-btn" onclick="location.reload()">Chơi Lại</button>
+    </div>
+  </div>
+
+  <script>
+    // Dữ liệu dự phòng
+    let words = [
+      { id: 1, hanzi: "你好", pinyin: "nǐ hǎo", meaning: "Xin chào" },
+      { id: 2, hanzi: "谢谢", pinyin: "xièxie", meaning: "Cảm ơn" },
+      { id: 3, hanzi: "学习", pinyin: "xuéxí", meaning: "Học tập" },
+      { id: 4, hanzi: "苹果", pinyin: "píngguǒ", meaning: "Quả táo" },
+      { id: 5, hanzi: "考试", pinyin: "kǎoshì", meaning: "Thi cử" }
+    ];
+
+    // Nạp dữ liệu từ words.txt giống các game trước
+    fetch('../words.txt')
+      .then(res => res.text())
+      .then(text => {
+        const lines = text.trim().split('\n');
+        if (lines.length > 1) {
+          const parsed = [];
+          for (let i = 1; i < lines.length; i++) {
+            const cols = lines[i].split('\t');
+            if (cols.length >= 4) {
+              parsed.push({ id: cols[0].trim(), hanzi: cols[1].trim(), pinyin: cols[2].trim(), meaning: cols[3].trim() });
+            }
+          }
+          if (parsed.length > 0) words = parsed;
+        }
+      }).catch(() => console.log("Dùng dữ liệu dự phòng"));
+
+    let progress = 0;
+    let isCheating = false;
+    let gameEnded = false;
+    let currentQ = null;
+
+    // Các trạng thái của Giáo Viên: READING (An toàn), WARNING (Chuẩn bị), LOOKING (Bắt bài)
+    let teacherState = 'READING'; 
+
+    const teacherSprite = document.getElementById('teacherSprite');
+    const alertIcon = document.getElementById('alertIcon');
+    const teacherStatus = document.getElementById('teacherStatus');
+    const progressBar = document.getElementById('progressBar');
+    const progressText = document.getElementById('progressText');
+
+    // --- LOGIC GIÁO VIÊN (AI) ---
+    function teacherLoop() {
+      if (gameEnded) return;
+
+      if (teacherState === 'READING') {
+        // Đổi sang cảnh báo
+        teacherState = 'WARNING';
+        teacherSprite.innerText = '👩‍🏫📰';
+        alertIcon.style.display = 'block';
+        teacherStatus.innerText = 'Cảm giác có người đang quay cóp...';
+        teacherStatus.style.color = '#feca57';
+        
+        // Thời gian cảnh báo siêu ngắn (0.8s - 1.2s)
+        setTimeout(teacherLoop, 800 + Math.random() * 400);
+
+      } else if (teacherState === 'WARNING') {
+        // Đổi sang nhìn (Bắt đầu trừ điểm nếu đang mở phao)
+        teacherState = 'LOOKING';
+        teacherSprite.innerText = '👩‍🏫👁️';
+        alertIcon.style.display = 'none';
+        teacherStatus.innerText = 'AI ĐANG MỞ PHAO ĐÓ?!';
+        teacherStatus.style.color = '#ff3f34';
+        
+        // Nhìn chằm chằm từ 2 đến 3.5 giây
+        setTimeout(teacherLoop, 2000 + Math.random() * 1500);
+
+      } else if (teacherState === 'LOOKING') {
+        // Quay lại đọc báo
+        teacherState = 'READING';
+        teacherSprite.innerText = '👩‍🏫📰';
+        teacherStatus.innerText = 'Cô đang đọc báo...';
+        teacherStatus.style.color = 'white';
+        
+        // Đọc báo từ 3 đến 6 giây
+        setTimeout(teacherLoop, 3000 + Math.random() * 3000);
+      }
+    }
+
+    // Bắt đầu vòng lặp giáo viên sau 2 giây
+    setTimeout(teacherLoop, 2000);
+
+    // Kiểm tra liên tục xem học sinh có bị bắt quả tang không
+    setInterval(() => {
+      if (teacherState === 'LOOKING' && isCheating && !gameEnded) {
+        caughtCheating();
+      }
+    }, 100);
+
+    // --- LOGIC NGƯỜI CHƠI & CÂU HỎI ---
+    function openCheatSheet() {
+      if (gameEnded) return;
+      isCheating = true;
+      document.getElementById('cheatModal').style.display = 'flex';
+      nextQuiz();
+    }
+
+    function closeCheatSheet() {
+      isCheating = false;
+      document.getElementById('cheatModal').style.display = 'none';
+    }
+
+    // Lắng nghe phím ESC hoặc Phím Cách để đóng phao nhanh
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' || e.key === ' ') closeCheatSheet();
+    });
+
+    function caughtCheating() {
+      // Đóng phao, báo đỏ, trừ tiến độ
+      closeCheatSheet();
+      document.getElementById('teacherDesk').classList.add('shaking');
+      setTimeout(() => document.getElementById('teacherDesk').classList.remove('shaking'), 400);
+
+      progress = Math.max(0, progress - 15); // Bị phạt trừ 15%
+      updateProgress();
+      
+      const exam = document.getElementById('examPaper');
+      exam.innerText = "❌ BỊ CÔ BẮT QUẢ TANG! BỊ TRỪ ĐIỂM!";
+      exam.style.color = "#ff3f34";
+      setTimeout(() => {
+        exam.innerText = "(Đề thi trắng tinh... Phải mở phao thôi!)";
+        exam.style.color = "#7f8ca6";
+      }, 2000);
+    }
+
+    function nextQuiz() {
+      currentQ = words[Math.floor(Math.random() * words.length)];
+      document.getElementById('targetHanzi').innerText = currentQ.hanzi;
+      document.getElementById('targetPinyin').innerText = currentQ.pinyin;
+
+      let wrongs = words.filter(w => w.meaning !== currentQ.meaning).sort(() => 0.5 - Math.random());
+      let choices = [currentQ.meaning];
+      for (let i = 0; i < Math.min(3, wrongs.length); i++) choices.push(wrongs[i].meaning);
+      choices.sort(() => 0.5 - Math.random());
+
+      const grid = document.getElementById('quizOptions');
+      grid.innerHTML = '';
+      choices.forEach(opt => {
+        const btn = document.createElement('button');
+        btn.className = 'opt-btn';
+        btn.innerText = opt;
+        btn.onclick = () => checkQuiz(opt);
+        grid.appendChild(btn);
+      });
+    }
+
+    function checkQuiz(selected) {
+      if (selected === currentQ.meaning) {
+        progress += 20; // Mỗi câu đúng được 20%
+        updateProgress();
+        document.getElementById('examPaper').innerText = "✔️ Chép được một câu!";
+        document.getElementById('examPaper').style.color = "#0be881";
+        
+        if (progress >= 100) {
+          gameEnded = true;
+          closeCheatSheet();
+          showEndScreen(true);
+        } else {
+          // Sang câu mới ngay lập tức để chép tiếp
+          nextQuiz();
+        }
+      } else {
+        // Trả lời sai cũng bị trừ nhẹ điểm để tránh bấm bừa
+        progress = Math.max(0, progress - 5);
+        updateProgress();
+        document.getElementById('examPaper').innerText = "Chép nhầm đáp án rồi...";
+        nextQuiz();
+      }
+    }
+
+    function updateProgress() {
+      progressBar.style.width = progress + '%';
+      progressText.innerText = progress;
+    }
+
+    function showEndScreen(win) {
+      document.getElementById('endModal').style.display = 'flex';
+      if (win) {
+        document.getElementById('endTitle').innerText = "💯 NỘP BÀI THÀNH CÔNG!";
+        document.getElementById('endTitle').style.color = "#0be881";
+        document.getElementById('endDesc').innerText = "Bạn đã qua mặt cô giáo trót lọt.";
+      }
+    }
+  </script>
+</body>
+</html>
