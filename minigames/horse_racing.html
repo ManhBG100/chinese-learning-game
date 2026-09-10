@@ -129,7 +129,7 @@
     .marker-p3 { filter: drop-shadow(0 0 5px #feca57); z-index: 2; }
 
     /* =========================================================================
-       1. GIAO DIỆN MÁY TÍNH (PC / LAPTOP >= 768px): BỐ CỤC NGANG RỘNG RÃI
+       1. GIAO DIỆN MÁY TÍNH (PC / LAPTOP >= 768px)
        ========================================================================= */
     @media (min-width: 768px) {
       body {
@@ -154,7 +154,6 @@
         gap: 12px;
         width: 100%;
       }
-      /* Thanh cự ly bên trái màn hình */
       .track-sidebar {
         width: 46px;
         height: 640px;
@@ -178,7 +177,6 @@
         left: 50%;
         transform: translate(-50%, 50%);
       }
-      /* Khu vực Canvas & Quiz Desktop */
       .stage-box {
         position: relative;
         width: 480px;
@@ -187,7 +185,6 @@
         width: 480px;
         height: 640px;
       }
-      /* Ô câu hỏi nổi dạng Overlay trên bầu trời PC */
       .quiz-container {
         position: absolute;
         top: 8px;
@@ -198,7 +195,7 @@
         border-radius: 8px;
         padding: 8px 12px;
         box-shadow: 0 4px 20px rgba(0,210,211,0.35);
-        display: none; /* Chỉ hiện khi có câu hỏi */
+        display: none;
         flex-direction: column;
         gap: 5px;
         z-index: 20;
@@ -220,7 +217,7 @@
     }
 
     /* =========================================================================
-       2. GIAO DIỆN ĐIỆN THOẠI (MOBILE < 768px): CO GIÃN VỪA KHÍT 100DVH
+       2. GIAO DIỆN ĐIỆN THOẠI (MOBILE < 768px)
        ========================================================================= */
     @media (max-width: 767px) {
       html, body {
@@ -253,7 +250,6 @@
         justify-content: space-between;
         width: 100%;
       }
-      /* Thanh cự ly ngang ở trên */
       .track-sidebar {
         width: 100%;
         height: 26px;
@@ -280,7 +276,6 @@
         transform: translate(-50%, -50%);
         font-size: 13px;
       }
-      /* Khung Canvas co giãn thông minh không tràn */
       .stage-box {
         flex: 1;
         min-height: 0;
@@ -298,7 +293,6 @@
         aspect-ratio: 480 / 640;
         object-fit: contain;
       }
-      /* Khung câu hỏi cố định chân màn hình điện thoại */
       .quiz-container {
         width: 100%;
         height: 106px;
@@ -425,16 +419,13 @@
 <body>
 
   <div class="app-layout">
-    <!-- Header -->
     <div class="header-bar">
       <a href="../index.html" class="btn-back">← Về Hub</a>
       <div class="badge-info" id="badgeSettings">Vàng • 3000m</div>
       <div class="race-info">Đích: <span id="distDisplay">0</span> / <span id="maxDistDisplay">3000</span>m</div>
     </div>
 
-    <!-- Khu vực chính: PC dàn ngang, Mobile dàn dọc -->
     <div class="game-main-area">
-      <!-- Thanh cự ly -->
       <div class="track-sidebar">
         <div style="font-size:14px;">🚩</div>
         <div class="progress-rail" id="progressRail">
@@ -445,7 +436,6 @@
         <div style="font-size:14px;">🏁</div>
       </div>
 
-      <!-- Khung Canvas -->
       <div class="stage-box">
         <canvas id="raceCanvas" width="480" height="640"></canvas>
 
@@ -457,7 +447,6 @@
           <span id="speedVal" style="font-weight:bold; min-width:38px;">55 km/h</span>
         </div>
 
-        <!-- Khung câu hỏi (PC: nổi trên Canvas; Mobile: xuống dưới) -->
         <div class="quiz-container" id="quizContainer">
           <div class="quiz-content" id="quizContent">
             <div class="quiz-top-info">
@@ -473,13 +462,12 @@
             <div class="quiz-btn-grid" id="quizOptions"></div>
           </div>
           <div class="quiz-idle-msg" id="quizIdleMsg">
-            🐎 <b>Đang đua tốc độ!</b><br>Vuốt Trái/Phải để né rào. Câu hỏi bứt tốc sẽ xuất hiện tại đây...
+            🐎 <b>Đang đua tốc độ!</b><br>Né rào cản. Câu hỏi bứt tốc sẽ xuất hiện tại đây...
           </div>
         </div>
       </div>
     </div>
 
-    <!-- Hướng dẫn điều khiển thích ứng -->
     <div class="controls-hint">
       <span class="pc-only">🎮 Phím <span class="kbd">A</span> / <span class="kbd">D</span> hoặc <span class="kbd">←</span> <span class="kbd">→</span> để né rào</span>
       <span class="mobile-only">📱 <b>Vuốt ngón tay Trái / Phải</b> để né rào</span>
@@ -537,8 +525,8 @@
   <div class="modal-overlay" id="hostModal" style="display: none;">
     <div class="modal-card">
       <h3 style="color:#feca57; font-size:16px;">TẠO PHÒNG ĐUA ONLINE</h3>
-      <div class="room-code-box" id="hostCodeDisplay">ĐANG TẠO...</div>
-      <p style="font-size:11px; color:#00d2d3;" id="hostStatusMsg">Gửi mã cho bạn bè hoặc chọn cấu hình phòng:</p>
+      <div class="room-code-box" id="hostCodeDisplay">ĐANG TẠO MÃ...</div>
+      <p style="font-size:12px; color:#00d2d3;" id="hostStatusMsg">Gửi mã cho bạn bè hoặc chọn cấu hình phòng:</p>
 
       <div class="setting-group" style="margin-top: 8px;">
         <div class="setting-title">1. Cự ly đua phòng:</div>
@@ -569,8 +557,9 @@
   <div class="modal-overlay" id="joinModal" style="display: none;">
     <div class="modal-card">
       <h3 style="color:#ff6b6b; font-size: 16px;">NHẬP MÃ PHÒNG</h3>
-      <input type="text" id="joinInput" class="room-input" placeholder="MÃ PHÒNG" maxlength="8">
-      <button class="btn-block" style="background:#00d2d3; color:#111;" onclick="joinRoomAction()">Vào Thi Đấu</button>
+      <input type="text" id="joinInput" class="room-input" placeholder="MÃ PHÒNG (VD: H1234)" maxlength="8">
+      <p id="joinStatusMsg" style="font-size: 12px; color: #feca57; margin-bottom: 8px; min-height: 16px;"></p>
+      <button class="btn-block" id="btnConfirmJoin" style="background:#00d2d3; color:#111;" onclick="joinRoomAction()">Vào Thi Đấu</button>
       <button class="btn-block" onclick="closeModal('joinModal')">Quay lại</button>
     </div>
   </div>
@@ -589,6 +578,19 @@
     const ctx = canvas.getContext('2d');
 
     // =================================================================
+    // CẤU HÌNH STUN SERVER GOOGLE XUYÊN TƯỜNG LỬA CHO P2P
+    // =================================================================
+    const PEER_CONFIG = {
+      config: {
+        iceServers: [
+          { urls: 'stun:stun.l.google.com:19302' },
+          { urls: 'stun:stun1.l.google.com:19302' },
+          { urls: 'stun:stun2.l.google.com:19302' }
+        ]
+      }
+    };
+
+    // =================================================================
     // HỆ THỐNG PHỐI CẢNH 3D: ĐỒNG BỘ ĐƯỜNG ĐUA & 3 LÀN
     // =================================================================
     const HORIZON_Y = 175;
@@ -596,7 +598,7 @@
     const Z_MIN = 50;
     const Z_MAX = 900;
     const D_VIEW = 110;
-    const CENTER_X = canvas.width / 2; // 240px
+    const CENTER_X = canvas.width / 2;
 
     const TOTAL_ROAD_WIDTH = 380;
     const LANE_SPACING = TOTAL_ROAD_WIDTH / 3;
@@ -741,13 +743,16 @@
       startRace();
     }
 
-    // ---------------- MULTIPLAYER P2P (PEERJS) ----------------
+    // =================================================================
+    // LOGIC MULTIPLAYER P2P (BẮT TAY 2 CHIỀU & TỰ ĐỘNG CỨU HỘ KẸT)
+    // =================================================================
     function openHostModal() {
       document.getElementById('menuModal').style.display = 'none';
       document.getElementById('hostModal').style.display = 'flex';
 
       const randomCode = 'H' + Math.floor(1000 + Math.random() * 9000);
-      peer = new Peer(randomCode);
+      if (peer) peer.destroy();
+      peer = new Peer(randomCode, PEER_CONFIG);
 
       peer.on('open', id => { document.getElementById('hostCodeDisplay').innerText = id; });
 
@@ -755,25 +760,17 @@
         conn = connection;
         isOnline = true;
         isHost = true;
-        setupP2P();
 
-        document.getElementById('hostStatusMsg').innerText = "Bạn bè đã vào! Đang xuất phát...";
+        document.getElementById('hostStatusMsg').innerText = "Đối thủ đã kết nối! Đang xác nhận bắt tay...";
         racer2.name = "Bạn Bè (P2)";
         racer2.isNPC = false;
         racer2.isLocal = false;
         racer2.active = true;
 
-        setTimeout(() => {
-          document.getElementById('hostModal').style.display = 'none';
-          applyNpcActiveStatus();
-          document.getElementById('badgeSettings').innerText = `Online • ${TOTAL_RACE_DIST}m`;
-          document.getElementById('maxDistDisplay').innerText = TOTAL_RACE_DIST;
-          startRace();
-          conn.send({ type: 'START_RACE', dist: TOTAL_RACE_DIST, rank: currentRank, npcCount: selectedNpcCount });
-        }, 1200);
+        setupP2PHandlers(conn);
       });
 
-      peer.on('error', err => alert("Lỗi kết nối: " + err));
+      peer.on('error', err => alert("Lỗi tạo phòng P2P: " + err));
     }
 
     function hostStartWithBots() {
@@ -784,45 +781,80 @@
     function openJoinModal() {
       document.getElementById('menuModal').style.display = 'none';
       document.getElementById('joinModal').style.display = 'flex';
+      document.getElementById('joinStatusMsg').innerText = "";
+      document.getElementById('btnConfirmJoin').disabled = false;
     }
 
     function joinRoomAction() {
       const code = document.getElementById('joinInput').value.trim().toUpperCase();
       if (!code) return alert("Vui lòng nhập mã phòng!");
 
-      peer = new Peer();
+      const statusEl = document.getElementById('joinStatusMsg');
+      statusEl.innerText = "⏳ Đang kết nối tới chủ phòng...";
+      document.getElementById('btnConfirmJoin').disabled = true;
+
+      if (peer) peer.destroy();
+      peer = new Peer(PEER_CONFIG);
+
       peer.on('open', () => {
-        conn = peer.connect(code);
+        conn = peer.connect(code, { reliable: true });
         isOnline = true;
         isHost = false;
 
-        conn.on('open', () => {
-          setupP2P();
-          document.getElementById('joinModal').style.display = 'none';
-          document.getElementById('badgeSettings').innerText = "Khách (P2)";
+        setupP2PHandlers(conn);
 
+        conn.on('open', () => {
+          statusEl.innerText = "✔ Kết nối thành công! Đang vào vạch xuất phát...";
           racer1.name = "Chủ Phòng (P1)";
           racer1.isLocal = false;
           racer2.name = "Bạn (P2)";
           racer2.isLocal = true;
           racer2.isNPC = false;
           racer2.active = true;
+
+          // BƯỚC BẮT TAY 1: Khách gửi tín hiệu READY ngay khi DataChannel mở
+          conn.send({ type: 'GUEST_READY' });
         });
       });
-      peer.on('error', err => alert("Không kết nối được phòng: " + err));
+
+      peer.on('error', err => {
+        statusEl.innerText = "❌ Lỗi: Không tìm thấy phòng hoặc mạng chập chờn!";
+        document.getElementById('btnConfirmJoin').disabled = false;
+      });
     }
 
-    function setupP2P() {
-      conn.on('data', data => {
-        if (data.type === 'START_RACE') {
-          TOTAL_RACE_DIST = data.dist;
-          currentRank = data.rank;
-          selectedNpcCount = data.npcCount;
+    function setupP2PHandlers(connection) {
+      connection.on('data', data => {
+        // BƯỚC BẮT TAY 2: Host nhận được READY từ Khách -> chính thức kích hoạt trận
+        if (isHost && data.type === 'GUEST_READY') {
+          document.getElementById('hostModal').style.display = 'none';
           applyNpcActiveStatus();
-          document.getElementById('maxDistDisplay').innerText = TOTAL_RACE_DIST;
           document.getElementById('badgeSettings').innerText = `Online • ${TOTAL_RACE_DIST}m`;
+          document.getElementById('maxDistDisplay').innerText = TOTAL_RACE_DIST;
+
           startRace();
-        } else if (data.type === 'SYNC_HOST_STATE') {
+
+          // Gửi lệnh START_RACE kèm thông số chặng
+          connection.send({
+            type: 'START_RACE',
+            dist: TOTAL_RACE_DIST,
+            rank: currentRank,
+            npcCount: selectedNpcCount
+          });
+        }
+
+        // BƯỚC BẮT TAY 3: Khách nhận START_RACE -> vào trận
+        if (!isHost && data.type === 'START_RACE') {
+          executeGuestEnterRace(data);
+        }
+
+        // ĐỒNG BỘ TRẠNG THÁI TỪ HOST
+        if (!isHost && data.type === 'SYNC_HOST_STATE') {
+          // CƠ CHẾ CỨU HỘ (FAIL-SAFE): Nếu Khách chưa start mà Host đã gửi dữ liệu chạy -> Tự động kích hoạt ngay!
+          if (!gameStarted) {
+            executeGuestEnterRace({ dist: TOTAL_RACE_DIST, rank: currentRank, npcCount: selectedNpcCount });
+          }
+
           racer1.lane = data.r1.lane;
           racer1.visualLane = data.r1.visualLane;
           racer1.distance = data.r1.distance;
@@ -830,7 +862,7 @@
           racer1.boostTimer = data.r1.boostTimer;
           racer1.stumbleTimer = data.r1.stumbleTimer;
 
-          if (racer3.active) {
+          if (racer3.active && data.r3) {
             racer3.lane = data.r3.lane;
             racer3.visualLane = data.r3.visualLane;
             racer3.distance = data.r3.distance;
@@ -839,17 +871,37 @@
             racer3.stumbleTimer = data.r3.stumbleTimer;
           }
           obstacles = data.obstacles;
-        } else if (data.type === 'SYNC_GUEST_STATE') {
+        }
+
+        // ĐỒNG BỘ TRẠNG THÁI TỪ KHÁCH
+        if (isHost && data.type === 'SYNC_GUEST_STATE') {
           racer2.lane = data.r2.lane;
           racer2.visualLane = data.r2.visualLane;
           racer2.distance = data.r2.distance;
           racer2.speed = data.r2.speed;
           racer2.boostTimer = data.r2.boostTimer;
           racer2.stumbleTimer = data.r2.stumbleTimer;
-        } else if (data.type === 'END_RACE') {
+        }
+
+        if (data.type === 'END_RACE') {
           finishRace();
         }
       });
+    }
+
+    // Hàm Khách vào trận đấu an toàn, đóng mọi modal chờ
+    function executeGuestEnterRace(data) {
+      TOTAL_RACE_DIST = data.dist || TOTAL_RACE_DIST;
+      currentRank = data.rank || currentRank;
+      selectedNpcCount = data.npcCount !== undefined ? data.npcCount : selectedNpcCount;
+
+      document.getElementById('joinModal').style.display = 'none';
+      document.getElementById('menuModal').style.display = 'none';
+      applyNpcActiveStatus();
+
+      document.getElementById('maxDistDisplay').innerText = TOTAL_RACE_DIST;
+      document.getElementById('badgeSettings').innerText = `Khách (P2) • ${TOTAL_RACE_DIST}m`;
+      startRace();
     }
 
     function closeModal(id) {
@@ -867,7 +919,7 @@
               conn.send({
                 type: 'SYNC_HOST_STATE',
                 r1: { lane: racer1.lane, visualLane: racer1.visualLane, distance: racer1.distance, speed: racer1.speed, boostTimer: racer1.boostTimer, stumbleTimer: racer1.stumbleTimer },
-                r3: racer3.active ? { lane: racer3.lane, visualLane: racer3.visualLane, distance: racer3.distance, speed: racer3.speed, boostTimer: racer3.boostTimer, stumbleTimer: racer3.stumbleTimer } : {},
+                r3: racer3.active ? { lane: racer3.lane, visualLane: racer3.visualLane, distance: racer3.distance, speed: racer3.speed, boostTimer: racer3.boostTimer, stumbleTimer: racer3.stumbleTimer } : null,
                 obstacles: obstacles
               });
             } else {
@@ -881,7 +933,7 @@
       }
     }
 
-    // ---------------- ĐIỀU KHIỂN: BÀN PHÍM PC & VUỐT TOUCH MOBILE ----------------
+    // ---------------- ĐIỀU KHIỂN & VUỐT TOUCH ----------------
     function getLocalRacer() {
       return racer1.isLocal ? racer1 : racer2;
     }
@@ -953,7 +1005,7 @@
 
       const p = getLocalRacer();
       if (isCorrect) {
-        p.boostTimer = 240; // 4 giây bứt tốc 115 km/h
+        p.boostTimer = 240;
       } else {
         p.stumbleTimer = 45;
       }
@@ -1090,7 +1142,6 @@
 
       document.getElementById('distDisplay').innerText = Math.min(TOTAL_RACE_DIST, Math.round(localPlayer.distance));
 
-      // Cập nhật thanh cự ly theo đúng chế độ màn hình
       const p1Pct = Math.min(100, (racer1.distance / TOTAL_RACE_DIST) * 100);
       const p2Pct = racer2.active ? Math.min(100, (racer2.distance / TOTAL_RACE_DIST) * 100) : 0;
       const p3Pct = racer3.active ? Math.min(100, (racer3.distance / TOTAL_RACE_DIST) * 100) : 0;
@@ -1123,12 +1174,12 @@
     }
 
     // =================================================================
-    // VẼ ĐỒ HỌA: RỪNG CÂY 2 BÊN & VẠCH PHÂN LÀN 3D
+    // VẼ ĐỒ HỌA PERSPECTIVE 3D
     // =================================================================
     function draw() {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-      // 1. Bầu trời đêm & Núi
+      // Bầu trời đêm & Núi
       const skyGrad = ctx.createLinearGradient(0, 0, 0, HORIZON_Y);
       skyGrad.addColorStop(0, "#080c14");
       skyGrad.addColorStop(1, "#172334");
@@ -1150,7 +1201,7 @@
       ctx.fillStyle = "#163a24";
       ctx.fillRect(0, HORIZON_Y, canvas.width, canvas.height - HORIZON_Y);
 
-      // 2. Mặt đường cát hình thang
+      // Mặt đường cát hình thang
       const halfRoad = TOTAL_ROAD_WIDTH / 2;
       const pFarLeft  = project3D(-halfRoad, Z_MAX);
       const pFarRight = project3D(halfRoad, Z_MAX);
@@ -1193,7 +1244,7 @@
         ctx.fill();
       }
 
-      // 3. Vạch phân làn thu nhỏ về xa
+      // Vạch phân làn thu nhỏ về xa
       const divider1X = -LANE_SPACING / 2;
       const divider2X =  LANE_SPACING / 2;
 
@@ -1217,7 +1268,7 @@
         });
       }
 
-      // 4. Danh sách vẽ Z-Sorting
+      // Danh sách vẽ Z-Sorting
       let renderList = [];
 
       const TREE_GAP = 75;
@@ -1232,7 +1283,6 @@
         renderList.push({ type: 'tree', xw:  390, z: z - 50, variant: 2 });
       }
 
-      // Rào cản
       obstacles.forEach(obs => {
         if (!obs.smashed) {
           const distDiff = obs.dist - localPlayer.distance;
@@ -1243,7 +1293,6 @@
         }
       });
 
-      // Đối thủ khác
       [racer1, racer2, racer3].forEach(r => {
         if (r !== localPlayer && r.active) {
           const distDiff = r.distance - localPlayer.distance;
@@ -1265,7 +1314,6 @@
         }
       });
 
-      // 5. Ngựa người chơi
       const pPos = project3D(localPlayer.visualLane * LANE_SPACING, Z_MIN);
       drawPerspectiveHorse(pPos.x, pPos.y, pPos.scale, localPlayer.color, localPlayer.icon, localPlayer.name, localPlayer.boostTimer > 0, localPlayer.stumbleTimer > 0);
     }
