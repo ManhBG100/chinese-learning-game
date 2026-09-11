@@ -4,15 +4,17 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Chinese Learning System</title>
-  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@700;800&display=swap" rel="stylesheet">
+  <!-- Nhúng font Pixel phong cách game cổ điển -->
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
   
   <style>
     * {
       box-sizing: border-box;
       margin: 0;
       padding: 0;
-      font-family: 'JetBrains Mono', monospace;
+      font-family: 'Press Start 2P', monospace;
       user-select: none;
+      border-radius: 0 !important;
     }
 
     /* TOÀN BỘ MÀN HÌNH LÀ NỀN GIF */
@@ -26,68 +28,67 @@
       align-items: center;
     }
 
-    /* MENU CHỈ LÀ CHỮ NỔI TRÊN NỀN */
+    /* KHUNG CHỨA 3 CHỮ MENU */
     .text-menu {
       display: flex;
       flex-direction: column;
-      gap: 32px;
-      text-align: center;
+      gap: 24px;
+      align-items: center;
       z-index: 10;
     }
 
+    /* CHỮ PHONG CÁCH PIXEL */
     .menu-text-link {
-      font-size: 38px;
-      font-weight: 800;
-      letter-spacing: 6px;
-      text-transform: uppercase;
-      color: rgba(255, 255, 255, 0.85);
-      background: none;
-      border: none;
+      font-size: 20px;
+      color: #ffffff;
+      background: transparent;
+      /* Đặt viền trong suốt sẵn để khi hover không bị giật chữ */
+      border: 3px solid transparent; 
+      padding: 14px 28px;
       cursor: pointer;
-      position: relative;
-      transition: all 0.2s ease;
-      text-shadow: 0 4px 12px rgba(0, 0, 0, 0.9), 0 0 8px rgba(0, 0, 0, 0.7);
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      /* Đổ bóng đen cứng dạng khối pixel phía sau chữ để dễ đọc trên nền ảnh */
+      text-shadow: 3px 3px 0px #000000;
+      transition: border-color 0.1s ease;
     }
 
-    /* HIỆU ỨNG RÊ CHUỘT PHÁT SÁNG & ĐỔI MÀU */
+    /* KHI DI CHUỘT: XUẤT HIỆN VIỀN TRẮNG */
     .menu-text-link:hover {
-      color: #00ff88;
-      text-shadow: 0 0 20px #00ff88, 0 0 40px #00ff88, 0 2px 10px rgba(0, 0, 0, 0.9);
-      transform: scale(1.08);
-      letter-spacing: 9px;
+      border: 3px solid #ffffff;
+      background: rgba(0, 0, 0, 0.6); /* Nền mờ nhẹ bên trong viền */
+      box-shadow: 4px 4px 0px #000000; /* Bóng cứng dạng pixel cho khung viền */
     }
 
     .menu-text-link:active {
-      transform: scale(0.98);
-      color: #00e5ff;
+      transform: translate(2px, 2px);
+      box-shadow: 2px 2px 0px #000000;
     }
 
-    /* --- CÁC CỬA SỔ BẬT LÊN KHI NHẤN CHỮ --- */
+    /* --- CÁC CỬA SỔ POPUP PIXEL --- */
     .modal-overlay {
       display: none;
       position: fixed;
       inset: 0;
-      background: rgba(0, 0, 0, 0.82);
-      backdrop-filter: blur(6px);
+      background: rgba(0, 0, 0, 0.85);
       justify-content: center;
       align-items: center;
       z-index: 100;
     }
 
     .modal-box {
-      background: #111116;
-      border: 2px solid #00ff88;
+      background: #000000;
+      border: 4px solid #ffffff;
       width: 90%;
-      max-width: 500px;
-      box-shadow: 0 0 30px rgba(0, 255, 136, 0.25);
+      max-width: 520px;
+      box-shadow: 8px 8px 0px #333333;
     }
 
     .modal-header {
-      background: #00ff88;
-      color: #000;
-      padding: 14px 20px;
-      font-weight: 800;
-      font-size: 16px;
+      background: #ffffff;
+      color: #000000;
+      padding: 14px 18px;
+      font-size: 13px;
       display: flex;
       justify-content: space-between;
       align-items: center;
@@ -95,13 +96,14 @@
 
     .close-btn {
       cursor: pointer;
-      font-size: 20px;
-      font-weight: 900;
-      line-height: 1;
+      font-size: 14px;
+      font-weight: bold;
     }
 
     .close-btn:hover {
-      color: #fff;
+      background: #000000;
+      color: #ffffff;
+      padding: 2px 6px;
     }
 
     .modal-body {
@@ -111,58 +113,54 @@
     .game-list {
       display: flex;
       flex-direction: column;
-      gap: 12px;
+      gap: 14px;
     }
 
     .game-link {
       display: flex;
       align-items: center;
-      background: #18181f;
-      color: #fff;
-      padding: 14px 18px;
+      background: #111111;
+      color: #ffffff;
+      padding: 12px 14px;
       text-decoration: none;
-      font-weight: 700;
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      transition: all 0.2s;
+      font-size: 11px;
+      line-height: 1.6;
+      border: 2px solid #333333;
     }
 
     .game-link span.num {
-      color: #00ff88;
-      margin-right: 15px;
+      color: #aaaaaa;
+      margin-right: 12px;
     }
 
     .game-link:hover {
-      background: #fff;
-      color: #000;
-      transform: translateX(8px);
+      background: #ffffff;
+      color: #000000;
+      border-color: #ffffff;
     }
 
     .game-link:hover span.num {
-      color: #000;
+      color: #000000;
     }
 
     .info-line {
-      color: #bbb;
-      margin-bottom: 12px;
-      line-height: 1.6;
-      font-size: 15px;
-    }
-
-    .info-line strong {
-      color: #00ff88;
+      color: #cccccc;
+      margin-bottom: 14px;
+      line-height: 1.8;
+      font-size: 11px;
     }
 
     @media (max-width: 600px) {
       .menu-text-link {
-        font-size: 28px;
-        letter-spacing: 4px;
+        font-size: 15px;
+        padding: 10px 18px;
       }
     }
   </style>
 </head>
 <body>
 
-  <!-- CHỈ CÓ 3 DÒNG CHỮ TRÊN NỀN -->
+  <!-- 3 DÒNG CHỮ MENU DẠNG PIXEL -->
   <main class="text-menu">
     <button class="menu-text-link" onclick="openModal('learnModal')">LEARN</button>
     <button class="menu-text-link" onclick="openModal('dataModal')">DATA</button>
@@ -173,8 +171,8 @@
   <div class="modal-overlay" id="learnModal">
     <div class="modal-box">
       <div class="modal-header">
-        <span>&gt;_ MODULE SELECTOR</span>
-        <span class="close-btn" onclick="closeModal('learnModal')">✕</span>
+        <span>&gt; SELECT MODULE</span>
+        <span class="close-btn" onclick="closeModal('learnModal')">[X]</span>
       </div>
       <div class="modal-body">
         <div class="game-list">
@@ -202,16 +200,16 @@
   <div class="modal-overlay" id="dataModal">
     <div class="modal-box">
       <div class="modal-header">
-        <span>&gt;_ VOCABULARY ARCHIVE</span>
-        <span class="close-btn" onclick="closeModal('dataModal')">✕</span>
+        <span>&gt; ARCHIVE DATA</span>
+        <span class="close-btn" onclick="closeModal('dataModal')">[X]</span>
       </div>
       <div class="modal-body">
-        <p class="info-line"><strong>Cơ sở dữ liệu:</strong> HSK 1 - HSK 6</p>
-        <p class="info-line"><strong>Tổng số từ vựng:</strong> 5,000+ Ký tự</p>
-        <p class="info-line"><strong>Bộ thủ cơ bản:</strong> 214 Bộ</p>
-        <div style="margin-top: 20px; border-top: 1px dashed #444; padding-top: 15px;">
-          <a href="#" class="game-link" style="justify-content: center; color: #00ff88;">
-            Mở Thư Viện Flashcard
+        <p class="info-line">DATABASE: HSK 1 - HSK 6</p>
+        <p class="info-line">TOTAL WORDS: 5,000+</p>
+        <p class="info-line">RADICALS: 214</p>
+        <div style="margin-top: 15px; border-top: 2px dashed #444; padding-top: 15px;">
+          <a href="#" class="game-link" style="justify-content: center;">
+            [ OPEN FLASHCARDS ]
           </a>
         </div>
       </div>
@@ -222,14 +220,13 @@
   <div class="modal-overlay" id="contactModal">
     <div class="modal-box">
       <div class="modal-header">
-        <span>&gt;_ COMMS CHANNEL</span>
-        <span class="close-btn" onclick="closeModal('contactModal')">✕</span>
+        <span>&gt; CONTACT INFO</span>
+        <span class="close-btn" onclick="closeModal('contactModal')">[X]</span>
       </div>
       <div class="modal-body">
-        <p class="info-line"><strong>Dự án:</strong> Chinese Learning Terminal</p>
-        <p class="info-line"><strong>Nhà phát triển:</strong> Motivators Team</p>
-        <p class="info-line"><strong>Hộp thư:</strong> fu.motivators@gmail.com</p>
-        <p class="info-line"><strong>GitHub:</strong> github.com/ManhBG100</p>
+        <p class="info-line">PROJECT: Chinese Terminal</p>
+        <p class="info-line">EMAIL: fu.motivators@gmail.com</p>
+        <p class="info-line">GITHUB: github.com/ManhBG100</p>
       </div>
     </div>
   </div>
