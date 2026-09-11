@@ -32,10 +32,17 @@
       justify-content: center;
       align-items: center;
       padding: 20px;
+    
+      /* --- CÁCH LÀM Y HỆT WEB TRƯỚC: NỀN ẢNH ĐỘNG GIF/WEBP --- */
       background-image: 
-        linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
-      background-size: 30px 30px; /* Lưới nền tạo cảm giác bản vẽ kỹ thuật */
+        /* Lớp phủ tối 60-70% giúp giữ tương phản cho giao diện Terminal */
+        linear-gradient(rgba(18, 18, 18, 0.7), rgba(18, 18, 18, 0.7)),
+        url("./asset/background.gif"); /* Đường dẫn tới file ảnh động */
+      
+      background-repeat: no-repeat;
+      background-position: center center;
+      background-size: cover;
+      background-attachment: fixed; /* Giữ cố định ảnh khi cuộn */
     }
 
     /* Container chính: Chứa 2 cột */
