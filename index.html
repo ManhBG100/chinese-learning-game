@@ -4,16 +4,15 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Chinese Learning System</title>
-  <!-- Sử dụng font chữ phong cách Code/Terminal -->
   <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700;800&display=swap" rel="stylesheet">
   
   <style>
     :root {
-      --bg-color: #121212;
-      --text-main: #f8f9fa;
-      --accent-color: #00ff88; /* Màu xanh lá phong cách Terminal */
-      --accent-secondary: #00a8ff; /* Xanh dương điểm nhấn */
-      --border-color: #495057;
+      --accent-green: #00ff88;
+      --accent-cyan: #00e5ff;
+      --text-bright: #ffffff;
+      --bg-panel: rgba(15, 15, 18, 0.85);
+      --border-line: rgba(255, 255, 255, 0.2);
     }
 
     * {
@@ -21,185 +20,168 @@
       margin: 0;
       padding: 0;
       font-family: 'JetBrains Mono', monospace;
-      border-radius: 0 !important; /* KHÔNG BO TRÒN BẤT CỨ ĐÂU */
+      border-radius: 0 !important;
+      user-select: none;
     }
 
+    /* TOÀN MÀN HÌNH NỀN GIF */
     body {
-      background-color: #121212;
-      color: var(--text-main);
-      min-height: 100vh;
+      width: 100vw;
+      height: 100vh;
+      overflow: hidden;
+      background: #0d0d11 url("./asset/background.gif") no-repeat center center / cover;
       display: flex;
+      flex-direction: column;
       justify-content: center;
       align-items: center;
-      padding: 20px;
-    
-      /* Thử tạm thời chỉ để lại đường dẫn ảnh, bỏ linear-gradient: */
-      background-image: url("./asset/background.gif");
-      
-      background-repeat: no-repeat;
-      background-position: center center;
-      background-size: cover;
-    }
-
-    /* Container chính: Chứa 2 cột */
-    .system-container {
-      display: flex;
-      flex-direction: row-reverse; /* Tiêu đề bên phải */
-      align-items: center;
-      justify-content: space-between;
-      width: 100%;
-      max-width: 1000px;
-      gap: 60px;
-      border: 2px solid var(--border-color);
-      padding: 60px;
-      background: #1a1a1a;
-      box-shadow: 10px 10px 0px rgba(0, 0, 0, 0.5); /* Đổ bóng cứng */
-    }
-
-    /* --- TIÊU ĐỀ LỆCH PHẢI --- */
-    .header-section {
-      flex: 1;
-      text-align: right;
-      display: flex;
-      flex-direction: column;
-      align-items: flex-end;
-    }
-
-    .project-code {
-      color: var(--border-color);
-      font-size: 14px;
-      letter-spacing: 2px;
-      margin-bottom: 10px;
-    }
-
-    .main-title {
-      font-size: 48px;
-      font-weight: 800;
-      line-height: 1.2;
-      text-transform: uppercase;
-      color: var(--text-main);
-      margin-bottom: 20px;
-      border-right: 8px solid var(--accent-color);
-      padding-right: 15px;
-    }
-
-    .main-title span {
-      color: var(--accent-color);
-    }
-
-    .status-bar {
-      display: inline-block;
-      padding: 6px 12px;
-      background: #2b2b2b;
-      border: 1px solid var(--border-color);
-      font-size: 13px;
-      color: var(--accent-secondary);
-    }
-
-    /* --- MENU BÊN TRÁI --- */
-    .menu-section {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      gap: 20px;
-      width: 100%;
-    }
-
-    .menu-btn {
-      background: #1a1a1a;
-      color: var(--text-main);
-      border: 2px solid var(--text-main);
-      padding: 16px 20px;
-      font-size: 16px;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 1px;
-      cursor: pointer;
-      text-align: left;
       position: relative;
-      transition: transform 0.1s;
-      box-shadow: -6px 6px 0px var(--border-color); /* Đổ bóng khối cứng bên trái */
+    }
+
+    /* Hiệu ứng quét dòng Scanline nhẹ cổ điển */
+    body::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%);
+      background-size: 100% 4px;
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    /* HEADER GÓC TRÊN */
+    .system-header {
+      position: absolute;
+      top: 35px;
+      left: 45px;
+      z-index: 2;
+    }
+
+    .system-title {
+      font-size: 26px;
+      font-weight: 800;
+      color: var(--text-bright);
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      text-shadow: 0 0 10px rgba(0, 255, 136, 0.4);
+    }
+
+    .system-status {
+      font-size: 12px;
+      color: var(--accent-green);
+      letter-spacing: 3px;
+      margin-top: 5px;
+    }
+
+    /* KHUNG 3 NÚT BẤM CHÍNH (NỔI TRỰC TIẾP TRÊN NỀN) */
+    .nav-menu {
+      position: relative;
+      z-index: 2;
+      display: flex;
+      flex-direction: column;
+      gap: 22px;
+      width: 90%;
+      max-width: 440px;
+    }
+
+    .menu-item {
+      background: var(--bg-panel);
+      border: 2px solid var(--border-line);
+      border-left: 6px solid var(--accent-green);
+      color: var(--text-bright);
+      padding: 18px 25px;
+      font-size: 17px;
+      font-weight: 700;
+      letter-spacing: 2px;
+      cursor: pointer;
       display: flex;
       justify-content: space-between;
+      align-items: center;
+      backdrop-filter: blur(8px);
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.6);
+      transition: all 0.15s ease-in-out;
     }
 
-    .menu-btn:hover:not(.disabled) {
-      background: var(--text-main);
+    .menu-item span.tag {
+      color: var(--accent-green);
+      margin-right: 10px;
+    }
+
+    .menu-item .arrow {
+      color: var(--accent-green);
+      font-weight: 800;
+      transition: transform 0.2s;
+    }
+
+    /* Hiệu ứng rê chuột */
+    .menu-item:hover {
+      background: #00ff88;
       color: #000;
-      box-shadow: -6px 6px 0px var(--accent-color);
-      transform: translate(2px, -2px);
+      border-color: #00ff88;
+      transform: translateX(12px);
+      box-shadow: -8px 0px 0px var(--accent-cyan), 0 0 20px rgba(0, 255, 136, 0.5);
     }
 
-    .menu-btn:active:not(.disabled) {
-      box-shadow: 0px 0px 0px var(--accent-color);
-      transform: translate(-4px, 4px); /* Hiệu ứng lún nút vật lý */
+    .menu-item:hover span.tag,
+    .menu-item:hover .arrow {
+      color: #000;
     }
 
-    .menu-btn.primary {
-      border-color: var(--accent-color);
-      box-shadow: -6px 6px 0px var(--accent-color);
+    .menu-item:hover .arrow {
+      transform: translateX(6px);
     }
 
-    .menu-btn.primary:hover {
-      background: var(--accent-color);
+    .menu-item:active {
+      transform: translateX(4px);
     }
 
-    .menu-btn.disabled {
-      color: #555;
-      border-color: #333;
-      box-shadow: -6px 6px 0px #111;
-      cursor: not-allowed;
-    }
-
-    /* --- MODAL (CỬA SỔ HIỂN THỊ) --- */
+    /* KHUNG POPUP / MODAL CHUNG */
     .modal-overlay {
       display: none;
       position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0, 0, 0, 0.85);
+      inset: 0;
+      background: rgba(0, 0, 0, 0.82);
+      backdrop-filter: blur(5px);
       justify-content: center;
       align-items: center;
       z-index: 100;
     }
 
     .modal-box {
-      background: #1a1a1a;
-      border: 2px solid var(--accent-color);
-      padding: 0;
+      background: #111116;
+      border: 2px solid var(--accent-green);
       width: 90%;
-      max-width: 550px;
-      box-shadow: 12px 12px 0px rgba(0, 255, 136, 0.2);
+      max-width: 520px;
+      box-shadow: 12px 12px 0px rgba(0, 255, 136, 0.25);
     }
 
     .modal-header {
-      background: var(--accent-color);
+      background: var(--accent-green);
       color: #000;
-      padding: 15px 20px;
+      padding: 14px 20px;
       font-weight: 800;
-      font-size: 18px;
+      font-size: 16px;
       display: flex;
       justify-content: space-between;
       align-items: center;
+      letter-spacing: 1px;
     }
 
-    .close-icon {
+    .close-btn {
       cursor: pointer;
       font-size: 20px;
-      font-weight: bold;
+      font-weight: 900;
       line-height: 1;
     }
 
-    .close-icon:hover {
+    .close-btn:hover {
       color: #fff;
     }
 
-    .modal-content {
-      padding: 30px;
+    .modal-body {
+      padding: 25px 20px;
     }
 
+    /* Danh sách game trong modal LEARN */
     .game-list {
       display: flex;
       flex-direction: column;
@@ -209,119 +191,157 @@
     .game-link {
       display: flex;
       align-items: center;
-      background: #222;
-      color: var(--text-main);
-      padding: 14px 15px;
+      background: #18181f;
+      color: var(--text-bright);
+      padding: 14px 18px;
       text-decoration: none;
       font-weight: 700;
-      border: 1px solid var(--border-color);
+      border: 1px solid rgba(255, 255, 255, 0.1);
       transition: all 0.2s;
     }
 
-    .game-link span.index {
-      color: var(--accent-color);
+    .game-link span.num {
+      color: var(--accent-green);
       margin-right: 15px;
     }
 
     .game-link:hover {
-      background: var(--text-main);
+      background: var(--text-bright);
       color: #000;
-      border-color: var(--text-main);
-      transform: translateX(10px);
+      border-color: var(--text-bright);
+      transform: translateX(8px);
     }
 
-    .game-link:hover span.index {
+    .game-link:hover span.num {
       color: #000;
     }
 
-    /* Responsive */
-    @media (max-width: 800px) {
-      .system-container {
-        flex-direction: column;
-        padding: 30px;
-        box-shadow: none;
+    /* Nội dung bảng liên hệ & dữ liệu */
+    .info-line {
+      color: #ccc;
+      margin-bottom: 12px;
+      line-height: 1.6;
+      font-size: 15px;
+    }
+
+    .info-line strong {
+      color: var(--accent-green);
+    }
+
+    @media (max-width: 600px) {
+      .system-header {
+        top: 25px;
+        left: 25px;
       }
-      .header-section {
-        align-items: center;
-        text-align: center;
-        border-right: none;
-        border-bottom: 4px solid var(--accent-color);
-        padding-bottom: 20px;
-        padding-right: 0;
+      .system-title {
+        font-size: 20px;
+      }
+      .menu-item {
+        padding: 15px 20px;
+        font-size: 15px;
       }
     }
   </style>
 </head>
 <body>
 
-  <div class="system-container">
-    <!-- Tiêu đề (Phải) -->
-    <div class="header-section">
-      <div class="project-code">/// SYSTEM.INITIALIZED</div>
-      <h1 class="main-title">Hệ Thống<br>Học <span>Hán Tự</span></h1>
-      <div class="status-bar">STATUS: ONLINE_</div>
-    </div>
-
-    <!-- Menu (Trái) -->
-    <div class="menu-section">
-      <button class="menu-btn primary" onclick="openGameModal()">
-        [ Khởi động Module ] <span>&gt;</span>
-      </button>
-      <button class="menu-btn disabled" title="Module chưa sẵn sàng">
-        [ Dữ liệu Flashcard ] <span>&gt;</span>
-      </button>
-      <button class="menu-btn disabled" title="Module chưa sẵn sàng">
-        [ Tùy chỉnh Hệ thống ] <span>&gt;</span>
-      </button>
-    </div>
+  <div class="system-header">
+    <div class="system-title">Hán Tự // CORE</div>
+    <div class="system-status">● SYSTEM READY_</div>
   </div>
 
-  <!-- Modal -->
-  <div class="modal-overlay" id="gameModal">
+  <nav class="nav-menu">
+    <div class="menu-item" onclick="openModal('learnModal')">
+      <span><span class="tag">[01]</span> LEARN</span>
+      <span class="arrow">&gt;&gt;</span>
+    </div>
+
+    <div class="menu-item" onclick="openModal('dataModal')">
+      <span><span class="tag">[02]</span> DATA</span>
+      <span class="arrow">&gt;&gt;</span>
+    </div>
+
+    <div class="menu-item" onclick="openModal('contactModal')">
+      <span><span class="tag">[03]</span> CONTACT US</span>
+      <span class="arrow">&gt;&gt;</span>
+    </div>
+  </nav>
+
+  <div class="modal-overlay" id="learnModal">
     <div class="modal-box">
-      <!-- Thanh tiêu đề cửa sổ -->
       <div class="modal-header">
-        <span>&gt;_ CHỌN MODULE LUYỆN TẬP</span>
-        <span class="close-icon" onclick="closeGameModal()">X</span>
+        <span>&gt;_ MODULE SELECTOR</span>
+        <span class="close-btn" onclick="closeModal('learnModal')">✕</span>
       </div>
-      
-      <!-- Nội dung cửa sổ -->
-      <div class="modal-content">
+      <div class="modal-body">
         <div class="game-list">
           <a href="./minigames/quiz.html" class="game-link">
-            <span class="index">01.</span> Trắc Nghiệm Hán Tự
+            <span class="num">01.</span> Trắc Nghiệm Hán Tự
           </a>
           <a href="./minigames/draw.html" class="game-link">
-            <span class="index">02.</span> Luyện Viết (Quick Draw)
+            <span class="num">02.</span> Luyện Viết (Quick Draw)
           </a>
           <a href="./minigames/fishing.html" class="game-link">
-            <span class="index">03.</span> Trò Chơi Câu Cá
+            <span class="num">03.</span> Trò Chơi Câu Cá
           </a>
           <a href="./minigames/horse_racing.html" class="game-link">
-            <span class="index">04.</span> Đua Ngựa Chữ Hán
+            <span class="num">04.</span> Đua Ngựa Chữ Hán
           </a>
           <a href="./minigames/exam_cheat.html" class="game-link">
-            <span class="index">05.</span> Thử Thách Vượt Kỳ Thi
+            <span class="num">05.</span> Thử Thách Vượt Kỳ Thi
           </a>
         </div>
       </div>
     </div>
   </div>
 
+  <div class="modal-overlay" id="dataModal">
+    <div class="modal-box">
+      <div class="modal-header">
+        <span>&gt;_ VOCABULARY ARCHIVE</span>
+        <span class="close-btn" onclick="closeModal('dataModal')">✕</span>
+      </div>
+      <div class="modal-body">
+        <p class="info-line"><strong>Cơ sở dữ liệu:</strong> HSK 1 - HSK 6</p>
+        <p class="info-line"><strong>Tổng số từ vựng:</strong> 5,000+ Ký tự</p>
+        <p class="info-line"><strong>Bộ thủ cơ bản:</strong> 214 Bộ</p>
+        <div style="margin-top: 20px; border-top: 1px dashed #444; padding-top: 15px;">
+          <a href="#" class="game-link" style="justify-content: center; color: var(--accent-green);">
+            Mở Thư Viện Flashcard
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="contactModal">
+    <div class="modal-box">
+      <div class="modal-header">
+        <span>&gt;_ COMMS CHANNEL</span>
+        <span class="close-btn" onclick="closeModal('contactModal')">✕</span>
+      </div>
+      <div class="modal-body">
+        <p class="info-line"><strong>Dự án:</strong> Chinese Learning Terminal</p>
+        <p class="info-line"><strong>Nhà phát triển:</strong> Motivators Team</p>
+        <p class="info-line"><strong>Hộp thư:</strong> fu.motivators@gmail.com</p>
+        <p class="info-line"><strong>GitHub:</strong> github.com/ManhBG100</p>
+      </div>
+    </div>
+  </div>
+
   <script>
-    function openGameModal() {
-      document.getElementById('gameModal').style.display = 'flex';
+    function openModal(id) {
+      document.getElementById(id).style.display = 'flex';
     }
 
-    function closeGameModal() {
-      document.getElementById('gameModal').style.display = 'none';
+    function closeModal(id) {
+      document.getElementById(id).style.display = 'none';
     }
 
-    // Đóng khi click ngoài khung modal
+    // Đóng modal khi bấm vào vùng đen mờ bên ngoài
     window.onclick = function(event) {
-      const modal = document.getElementById('gameModal');
-      if (event.target === modal) {
-        closeGameModal();
+      if (event.target.classList.contains('modal-overlay')) {
+        event.target.style.display = 'none';
       }
     }
   </script>
