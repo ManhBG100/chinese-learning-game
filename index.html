@@ -6,7 +6,7 @@
   <title>Chinese Learning System</title>
   
   <style>
-    /* 1. KHAI BÁO FONT PIXEL VIỆT HÓA TỪ THƯ MỤC ASSET */
+    /* 1. FONT PIXEL VIỆT HÓA */
     @font-face {
       font-family: "PixelVN";
       src: url("./asset/pixel-vn.ttf") format("truetype");
@@ -21,7 +21,7 @@
       border-radius: 0 !important;
     }
 
-    /* TOÀN BỘ MÀN HÌNH LÀ NỀN GIF */
+    /* TOÀN MÀN HÌNH LÀ NỀN GIF */
     body {
       width: 100vw;
       height: 100vh;
@@ -30,19 +30,42 @@
       display: flex;
       justify-content: center;
       align-items: center;
+      position: relative;
     }
 
-    /* MENU CHỈ LÀ 3 CHỮ NỔI TRÊN NỀN */
-    .text-menu {
+    /* NÚT MŨI TÊN QUAY LẠI Ở GÓC TRÊN BÊN TRÁI */
+    #back-btn {
+      display: none; /* Mặc định ẩn, chỉ hiện khi vào menu con */
+      position: fixed;
+      top: 35px;
+      left: 35px;
+      background: none;
+      border: none;
+      outline: none;
+      color: #ffffff;
+      font-size: 32px;
+      cursor: pointer;
+      z-index: 100;
+      text-shadow: 3px 3px 0px #000000;
+      transition: all 0.15s ease;
+    }
+
+    #back-btn:hover {
+      color: #888888; /* Màu đậm/sậm lại nhẹ khi hover */
+      transform: translateX(-5px);
+    }
+
+    /* KHUNG CHỨA CÁC MÀN HÌNH CHỮ */
+    .view-container {
       display: flex;
       flex-direction: column;
-      gap: 32px;
       align-items: center;
+      gap: 28px;
       z-index: 10;
     }
 
-    /* 2. CHỮ PIXEL MẶC ĐỊNH (KHÔNG HỘP, KHÔNG VIỀN KHUNG) */
-    .menu-text-link {
+    /* 1. MENU CHÍNH (HỌC TẬP, DỮ LIỆU, LIÊN HỆ) */
+    .main-btn {
       font-size: 26px;
       color: #ffffff;
       background: none;
@@ -52,207 +75,138 @@
       cursor: pointer;
       text-transform: uppercase;
       letter-spacing: 4px;
-      line-height: 1.5; /* Đủ khoảng trống để dấu tiếng Việt không bị cắt */
+      line-height: 1.5;
       text-decoration: none;
-      text-shadow: 3px 3px 0px #000000; /* Bóng pixel đen giúp nổi trên nền động */
+      text-shadow: 3px 3px 0px #000000;
       transition: all 0.15s ease;
     }
 
-    /* 3. HIỆU ỨNG HOVER: RỖNG RUỘT + HIỆN VIỀN NÉT CHỮ + GẠCH CHÂN */
-    .menu-text-link:hover {
-      color: transparent;                 /* Rỗng ruột chữ */
-      -webkit-text-stroke: 1.5px #ffffff; /* Viền bao quanh từng nét chữ */
-      text-decoration: underline;         /* Gạch chân */
-      text-underline-offset: 10px;        /* Khoảng cách đường gạch chân */
-      text-decoration-thickness: 3px;     /* Độ dày gạch chân */
+    .main-btn:hover {
+      color: transparent;
+      -webkit-text-stroke: 1.5px #ffffff;
+      text-decoration: underline;
+      text-underline-offset: 10px;
+      text-decoration-thickness: 3px;
       text-decoration-color: #ffffff;
       text-shadow: none;
     }
 
-    .menu-text-link:active {
-      transform: translateY(2px);
-    }
-
-    /* --- CÁC BẢNG POPUP THÔNG TIN --- */
-    .modal-overlay {
+    /* 2. DANH SÁCH GAME (CHỮ THUẦN NỔI TRÊN NỀN, KHÔNG KHUNG HỘP) */
+    #learn-view {
       display: none;
-      position: fixed;
-      inset: 0;
-      background: rgba(0, 0, 0, 0.85);
-      justify-content: center;
-      align-items: center;
-      z-index: 100;
+      gap: 22px;
     }
 
-    .modal-box {
-      background: #000000;
-      border: 3px solid #ffffff;
-      width: 90%;
-      max-width: 540px;
-      box-shadow: 8px 8px 0px #222222;
-    }
-
-    .modal-header {
-      background: #ffffff;
-      color: #000000;
-      padding: 12px 18px;
-      font-size: 15px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-
-    .close-btn {
-      cursor: pointer;
-      font-size: 16px;
-      font-weight: bold;
-    }
-
-    .close-btn:hover {
-      background: #000000;
+    .game-item {
+      font-size: 20px;
       color: #ffffff;
-      padding: 2px 6px;
-    }
-
-    .modal-body {
-      padding: 25px 20px;
-    }
-
-    .game-list {
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-    }
-
-    .game-link {
-      display: flex;
-      align-items: center;
-      background: #111111;
-      color: #ffffff;
-      padding: 12px 16px;
       text-decoration: none;
-      font-size: 14px;
-      border: 1px solid #333333;
-      transition: all 0.15s;
+      letter-spacing: 3px;
+      line-height: 1.6;
+      text-shadow: 3px 3px 0px #000000;
+      transition: color 0.15s ease, transform 0.15s ease;
     }
 
-    .game-link span.num {
-      color: #888888;
-      margin-right: 14px;
+    /* Hover đổi màu đậm nhẹ và hơi trượt nhẹ */
+    .game-item:hover {
+      color: #999999; /* Chữ sậm/đậm màu lại nhẹ */
+      transform: translateX(8px);
     }
 
-    .game-link:hover {
-      background: #ffffff;
-      color: #000000;
-      border-color: #ffffff;
-      transform: translateX(6px);
+    /* 3. DỮ LIỆU & LIÊN HỆ (CHỮ NỔI ĐƠN GIẢN TRÊN NỀN) */
+    #data-view, #contact-view {
+      display: none;
+      text-align: center;
+      gap: 18px;
     }
 
-    .game-link:hover span.num {
-      color: #000000;
-    }
-
-    .info-line {
-      color: #cccccc;
-      margin-bottom: 14px;
+    .info-text {
+      color: #ffffff;
+      font-size: 16px;
+      letter-spacing: 2px;
       line-height: 1.8;
-      font-size: 14px;
+      text-shadow: 3px 3px 0px #000000;
     }
 
-    @media (max-width: 600px) {
-      .menu-text-link {
-        font-size: 18px;
+    @media (max-width: 768px) {
+      #back-btn {
+        top: 20px;
+        left: 20px;
+        font-size: 26px;
+      }
+      .main-btn {
+        font-size: 20px;
         letter-spacing: 2px;
+      }
+      .game-item {
+        font-size: 15px;
+        letter-spacing: 2px;
+      }
+      .info-text {
+        font-size: 13px;
       }
     }
   </style>
 </head>
 <body>
 
-  <!-- 3 CHỮ MENU TRÊN NỀN -->
-  <main class="text-menu">
-    <button class="menu-text-link" onclick="openModal('learnModal')">HỌC TẬP</button>
-    <button class="menu-text-link" onclick="openModal('dataModal')">DỮ LIỆU</button>
-    <button class="menu-text-link" onclick="openModal('contactModal')">LIÊN HỆ</button>
+  <!-- MŨI TÊN QUAY LẠI GÓC TRÊN BÊN TRÁI -->
+  <button id="back-btn" onclick="showMain()" title="Quay lại">←</button>
+
+  <!-- MENU CHÍNH -->
+  <main id="main-view" class="view-container">
+    <button class="main-btn" onclick="openView('learn-view')">HỌC TẬP</button>
+    <button class="main-btn" onclick="openView('data-view')">DỮ LIỆU</button>
+    <button class="main-btn" onclick="openView('contact-view')">LIÊN HỆ</button>
   </main>
 
-  <!-- MODAL: HỌC TẬP (LEARN) -->
-  <div class="modal-overlay" id="learnModal">
-    <div class="modal-box">
-      <div class="modal-header">
-        <span>&gt; CHỌN TRÒ CHƠI</span>
-        <span class="close-btn" onclick="closeModal('learnModal')">[X]</span>
-      </div>
-      <div class="modal-body">
-        <div class="game-list">
-          <a href="./minigames/quiz.html" class="game-link">
-            <span class="num">01.</span> Trắc Nghiệm Hán Tự
-          </a>
-          <a href="./minigames/draw.html" class="game-link">
-            <span class="num">02.</span> Luyện Viết (Quick Draw)
-          </a>
-          <a href="./minigames/fishing.html" class="game-link">
-            <span class="num">03.</span> Trò Chơi Câu Cá
-          </a>
-          <a href="./minigames/horse_racing.html" class="game-link">
-            <span class="num">04.</span> Đua Ngựa Chữ Hán
-          </a>
-          <a href="./minigames/exam_cheat.html" class="game-link">
-            <span class="num">05.</span> Vượt Qua Kỳ Thi
-          </a>
-        </div>
-      </div>
-    </div>
+  <!-- DANH SÁCH GAME TRỰC TIẾP TRÊN NỀN -->
+  <div id="learn-view" class="view-container">
+    <a href="./minigames/quiz.html" class="game-item">Trắc Nghiệm Hán Tự</a>
+    <a href="./minigames/draw.html" class="game-item">Luyện Viết (Quick Draw)</a>
+    <a href="./minigames/fishing.html" class="game-item">Trò Chơi Câu Cá</a>
+    <a href="./minigames/horse_racing.html" class="game-item">Đua Ngựa Chữ Hán</a>
+    <a href="./minigames/exam_cheat.html" class="game-item">Vượt Qua Kỳ Thi</a>
   </div>
 
-  <!-- MODAL: DỮ LIỆU (DATA) -->
-  <div class="modal-overlay" id="dataModal">
-    <div class="modal-box">
-      <div class="modal-header">
-        <span>&gt; KHO DỮ LIỆU</span>
-        <span class="close-btn" onclick="closeModal('dataModal')">[X]</span>
-      </div>
-      <div class="modal-body">
-        <p class="info-line">HỆ THỐNG: HSK 1 - HSK 6</p>
-        <p class="info-line">TỔNG TỪ VỰNG: 5,000+ TỪ</p>
-        <p class="info-line">BỘ THỦ CƠ BẢN: 214 BỘ</p>
-        <div style="margin-top: 15px; border-top: 1px dashed #444; padding-top: 15px;">
-          <a href="#" class="game-link" style="justify-content: center;">
-            [ MỞ FLASHCARD ]
-          </a>
-        </div>
-      </div>
-    </div>
+  <!-- THÔNG TIN DỮ LIỆU -->
+  <div id="data-view" class="view-container">
+    <p class="info-text">HỆ THỐNG: HSK 1 - HSK 6</p>
+    <p class="info-text">TỔNG TỪ VỰNG: 5,000+ TỪ</p>
+    <p class="info-text">BỘ THỦ CƠ BẢN: 214 BỘ</p>
   </div>
 
-  <!-- MODAL: LIÊN HỆ (CONTACT US) -->
-  <div class="modal-overlay" id="contactModal">
-    <div class="modal-box">
-      <div class="modal-header">
-        <span>&gt; THÔNG TIN LIÊN HỆ</span>
-        <span class="close-btn" onclick="closeModal('contactModal')">[X]</span>
-      </div>
-      <div class="modal-body">
-        <p class="info-line">DỰ ÁN: CHINESE TERMINAL</p>
-        <p class="info-line">HỘP THƯ: fu.motivators@gmail.com</p>
-        <p class="info-line">GITHUB: github.com/ManhBG100</p>
-      </div>
-    </div>
+  <!-- THÔNG TIN LIÊN HỆ -->
+  <div id="contact-view" class="view-container">
+    <p class="info-text">DỰ ÁN: CHINESE TERMINAL</p>
+    <p class="info-text">EMAIL: FU.MOTIVATORS@GMAIL.COM</p>
+    <p class="info-text">GITHUB: GITHUB.COM/MANHBG100</p>
   </div>
 
   <script>
-    function openModal(id) {
-      document.getElementById(id).style.display = 'flex';
+    function openView(viewId) {
+      // Ẩn menu chính
+      document.getElementById('main-view').style.display = 'none';
+
+      // Ẩn các view con khác nếu có
+      document.getElementById('learn-view').style.display = 'none';
+      document.getElementById('data-view').style.display = 'none';
+      document.getElementById('contact-view').style.display = 'none';
+
+      // Hiện view được chọn và hiện nút quay lại
+      document.getElementById(viewId).style.display = 'flex';
+      document.getElementById('back-btn').style.display = 'block';
     }
 
-    function closeModal(id) {
-      document.getElementById(id).style.display = 'none';
-    }
+    function showMain() {
+      // Ẩn tất cả view con và nút quay lại
+      document.getElementById('learn-view').style.display = 'none';
+      document.getElementById('data-view').style.display = 'none';
+      document.getElementById('contact-view').style.display = 'none';
+      document.getElementById('back-btn').style.display = 'none';
 
-    window.onclick = function(event) {
-      if (event.target.classList.contains('modal-overlay')) {
-        event.target.style.display = 'none';
-      }
+      // Hiện lại menu chính
+      document.getElementById('main-view').style.display = 'flex';
     }
   </script>
 </body>
