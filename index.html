@@ -25,7 +25,7 @@
     }
 
     body {
-      background-color: var(--bg-color);
+      background-color: #121212;
       color: var(--text-main);
       min-height: 100vh;
       display: flex;
@@ -33,16 +33,12 @@
       align-items: center;
       padding: 20px;
     
-      /* --- CÁCH LÀM Y HỆT WEB TRƯỚC: NỀN ẢNH ĐỘNG GIF/WEBP --- */
-      background-image: 
-        /* Lớp phủ tối 60-70% giúp giữ tương phản cho giao diện Terminal */
-        linear-gradient(rgba(18, 18, 18, 0.7), rgba(18, 18, 18, 0.7)),
-        url("./asset/background.gif"); /* Đường dẫn tới file ảnh động */
+      /* Thử tạm thời chỉ để lại đường dẫn ảnh, bỏ linear-gradient: */
+      background-image: url("./asset/background.gif");
       
       background-repeat: no-repeat;
       background-position: center center;
       background-size: cover;
-      background-attachment: fixed; /* Giữ cố định ảnh khi cuộn */
     }
 
     /* Container chính: Chứa 2 cột */
