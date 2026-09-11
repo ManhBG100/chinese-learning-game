@@ -4,15 +4,19 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Chinese Learning System</title>
-  <!-- Nhúng font Pixel phong cách game cổ điển -->
-  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
   
   <style>
+    /* 1. KHAI BÁO FONT PIXEL VIỆT HÓA TỪ THƯ MỤC ASSET */
+    @font-face {
+      font-family: "PixelVN";
+      src: url("./asset/pixel-vn.ttf") format("truetype");
+    }
+
     * {
       box-sizing: border-box;
       margin: 0;
       padding: 0;
-      font-family: 'Press Start 2P', monospace;
+      font-family: "PixelVN", monospace, sans-serif;
       user-select: none;
       border-radius: 0 !important;
     }
@@ -28,44 +32,48 @@
       align-items: center;
     }
 
-    /* KHUNG CHỨA 3 CHỮ MENU */
+    /* MENU CHỈ LÀ 3 CHỮ NỔI TRÊN NỀN */
     .text-menu {
       display: flex;
       flex-direction: column;
-      gap: 24px;
+      gap: 32px;
       align-items: center;
       z-index: 10;
     }
 
-    /* CHỮ PHONG CÁCH PIXEL */
+    /* 2. CHỮ PIXEL MẶC ĐỊNH (KHÔNG HỘP, KHÔNG VIỀN KHUNG) */
     .menu-text-link {
-      font-size: 20px;
+      font-size: 26px;
       color: #ffffff;
-      background: transparent;
-      /* Đặt viền trong suốt sẵn để khi hover không bị giật chữ */
-      border: 3px solid transparent; 
-      padding: 14px 28px;
+      background: none;
+      border: none;
+      outline: none;
+      padding: 6px 12px;
       cursor: pointer;
       text-transform: uppercase;
-      letter-spacing: 2px;
-      /* Đổ bóng đen cứng dạng khối pixel phía sau chữ để dễ đọc trên nền ảnh */
-      text-shadow: 3px 3px 0px #000000;
-      transition: border-color 0.1s ease;
+      letter-spacing: 4px;
+      line-height: 1.5; /* Đủ khoảng trống để dấu tiếng Việt không bị cắt */
+      text-decoration: none;
+      text-shadow: 3px 3px 0px #000000; /* Bóng pixel đen giúp nổi trên nền động */
+      transition: all 0.15s ease;
     }
 
-    /* KHI DI CHUỘT: XUẤT HIỆN VIỀN TRẮNG */
+    /* 3. HIỆU ỨNG HOVER: RỖNG RUỘT + HIỆN VIỀN NÉT CHỮ + GẠCH CHÂN */
     .menu-text-link:hover {
-      border: 3px solid #ffffff;
-      background: rgba(0, 0, 0, 0.6); /* Nền mờ nhẹ bên trong viền */
-      box-shadow: 4px 4px 0px #000000; /* Bóng cứng dạng pixel cho khung viền */
+      color: transparent;                 /* Rỗng ruột chữ */
+      -webkit-text-stroke: 1.5px #ffffff; /* Viền bao quanh từng nét chữ */
+      text-decoration: underline;         /* Gạch chân */
+      text-underline-offset: 10px;        /* Khoảng cách đường gạch chân */
+      text-decoration-thickness: 3px;     /* Độ dày gạch chân */
+      text-decoration-color: #ffffff;
+      text-shadow: none;
     }
 
     .menu-text-link:active {
-      transform: translate(2px, 2px);
-      box-shadow: 2px 2px 0px #000000;
+      transform: translateY(2px);
     }
 
-    /* --- CÁC CỬA SỔ POPUP PIXEL --- */
+    /* --- CÁC BẢNG POPUP THÔNG TIN --- */
     .modal-overlay {
       display: none;
       position: fixed;
@@ -78,17 +86,17 @@
 
     .modal-box {
       background: #000000;
-      border: 4px solid #ffffff;
+      border: 3px solid #ffffff;
       width: 90%;
-      max-width: 520px;
-      box-shadow: 8px 8px 0px #333333;
+      max-width: 540px;
+      box-shadow: 8px 8px 0px #222222;
     }
 
     .modal-header {
       background: #ffffff;
       color: #000000;
-      padding: 14px 18px;
-      font-size: 13px;
+      padding: 12px 18px;
+      font-size: 15px;
       display: flex;
       justify-content: space-between;
       align-items: center;
@@ -96,7 +104,7 @@
 
     .close-btn {
       cursor: pointer;
-      font-size: 14px;
+      font-size: 16px;
       font-weight: bold;
     }
 
@@ -113,7 +121,7 @@
     .game-list {
       display: flex;
       flex-direction: column;
-      gap: 14px;
+      gap: 12px;
     }
 
     .game-link {
@@ -121,22 +129,23 @@
       align-items: center;
       background: #111111;
       color: #ffffff;
-      padding: 12px 14px;
+      padding: 12px 16px;
       text-decoration: none;
-      font-size: 11px;
-      line-height: 1.6;
-      border: 2px solid #333333;
+      font-size: 14px;
+      border: 1px solid #333333;
+      transition: all 0.15s;
     }
 
     .game-link span.num {
-      color: #aaaaaa;
-      margin-right: 12px;
+      color: #888888;
+      margin-right: 14px;
     }
 
     .game-link:hover {
       background: #ffffff;
       color: #000000;
       border-color: #ffffff;
+      transform: translateX(6px);
     }
 
     .game-link:hover span.num {
@@ -147,31 +156,31 @@
       color: #cccccc;
       margin-bottom: 14px;
       line-height: 1.8;
-      font-size: 11px;
+      font-size: 14px;
     }
 
     @media (max-width: 600px) {
       .menu-text-link {
-        font-size: 15px;
-        padding: 10px 18px;
+        font-size: 18px;
+        letter-spacing: 2px;
       }
     }
   </style>
 </head>
 <body>
 
-  <!-- 3 DÒNG CHỮ MENU DẠNG PIXEL -->
+  <!-- 3 CHỮ MENU TRÊN NỀN -->
   <main class="text-menu">
-    <button class="menu-text-link" onclick="openModal('learnModal')">LEARN</button>
-    <button class="menu-text-link" onclick="openModal('dataModal')">DATA</button>
-    <button class="menu-text-link" onclick="openModal('contactModal')">CONTACT US</button>
+    <button class="menu-text-link" onclick="openModal('learnModal')">HỌC TẬP</button>
+    <button class="menu-text-link" onclick="openModal('dataModal')">DỮ LIỆU</button>
+    <button class="menu-text-link" onclick="openModal('contactModal')">LIÊN HỆ</button>
   </main>
 
-  <!-- MODAL: LEARN -->
+  <!-- MODAL: HỌC TẬP (LEARN) -->
   <div class="modal-overlay" id="learnModal">
     <div class="modal-box">
       <div class="modal-header">
-        <span>&gt; SELECT MODULE</span>
+        <span>&gt; CHỌN TRÒ CHƠI</span>
         <span class="close-btn" onclick="closeModal('learnModal')">[X]</span>
       </div>
       <div class="modal-body">
@@ -189,43 +198,43 @@
             <span class="num">04.</span> Đua Ngựa Chữ Hán
           </a>
           <a href="./minigames/exam_cheat.html" class="game-link">
-            <span class="num">05.</span> Thử Thách Vượt Kỳ Thi
+            <span class="num">05.</span> Vượt Qua Kỳ Thi
           </a>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- MODAL: DATA -->
+  <!-- MODAL: DỮ LIỆU (DATA) -->
   <div class="modal-overlay" id="dataModal">
     <div class="modal-box">
       <div class="modal-header">
-        <span>&gt; ARCHIVE DATA</span>
+        <span>&gt; KHO DỮ LIỆU</span>
         <span class="close-btn" onclick="closeModal('dataModal')">[X]</span>
       </div>
       <div class="modal-body">
-        <p class="info-line">DATABASE: HSK 1 - HSK 6</p>
-        <p class="info-line">TOTAL WORDS: 5,000+</p>
-        <p class="info-line">RADICALS: 214</p>
-        <div style="margin-top: 15px; border-top: 2px dashed #444; padding-top: 15px;">
+        <p class="info-line">HỆ THỐNG: HSK 1 - HSK 6</p>
+        <p class="info-line">TỔNG TỪ VỰNG: 5,000+ TỪ</p>
+        <p class="info-line">BỘ THỦ CƠ BẢN: 214 BỘ</p>
+        <div style="margin-top: 15px; border-top: 1px dashed #444; padding-top: 15px;">
           <a href="#" class="game-link" style="justify-content: center;">
-            [ OPEN FLASHCARDS ]
+            [ MỞ FLASHCARD ]
           </a>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- MODAL: CONTACT US -->
+  <!-- MODAL: LIÊN HỆ (CONTACT US) -->
   <div class="modal-overlay" id="contactModal">
     <div class="modal-box">
       <div class="modal-header">
-        <span>&gt; CONTACT INFO</span>
+        <span>&gt; THÔNG TIN LIÊN HỆ</span>
         <span class="close-btn" onclick="closeModal('contactModal')">[X]</span>
       </div>
       <div class="modal-body">
-        <p class="info-line">PROJECT: Chinese Terminal</p>
-        <p class="info-line">EMAIL: fu.motivators@gmail.com</p>
+        <p class="info-line">DỰ ÁN: CHINESE TERMINAL</p>
+        <p class="info-line">HỘP THƯ: fu.motivators@gmail.com</p>
         <p class="info-line">GITHUB: github.com/ManhBG100</p>
       </div>
     </div>
