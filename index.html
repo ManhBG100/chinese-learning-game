@@ -30,29 +30,41 @@
       display: flex;
       justify-content: center;
       align-items: center;
-      position: relative;
     }
 
-    /* NÚT MŨI TÊN QUAY LẠI Ở GÓC TRÊN BÊN TRÁI */
+    /* KHUNG TƯƠNG ĐỐI CHỨA CẢ MŨI TÊN VÀ NỘI DUNG */
+    .menu-stage {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-width: 340px;
+      max-width: 90vw;
+    }
+
+    /* MŨI TÊN TO, NẰM Ở GÓC TRÊN BÊN TRÁI CỦA KHUNG NỘI DUNG */
     #back-btn {
       display: none; /* Mặc định ẩn, chỉ hiện khi vào menu con */
-      position: fixed;
-      top: 35px;
-      left: 35px;
+      position: absolute;
+      top: -75px;    /* Đẩy lên phía trên cụm danh sách */
+      left: 0;       /* Canh thẳng hàng với mép trái của khung */
       background: none;
       border: none;
       outline: none;
       color: #ffffff;
-      font-size: 32px;
+      font-size: 54px; /* Mũi tên to rõ */
+      font-weight: 900;
+      line-height: 1;
       cursor: pointer;
       z-index: 100;
-      text-shadow: 3px 3px 0px #000000;
+      text-shadow: 4px 4px 0px #000000;
       transition: all 0.15s ease;
     }
 
     #back-btn:hover {
-      color: #888888; /* Màu đậm/sậm lại nhẹ khi hover */
-      transform: translateX(-5px);
+      color: #888888;
+      transform: translateX(-8px); /* Trượt nhẹ sang trái khi hover */
     }
 
     /* KHUNG CHỨA CÁC MÀN HÌNH CHỮ */
@@ -64,7 +76,7 @@
       z-index: 10;
     }
 
-    /* 1. MENU CHÍNH (HỌC TẬP, DỮ LIỆU, LIÊN HỆ) */
+    /* 1. MENU CHÍNH */
     .main-btn {
       font-size: 26px;
       color: #ffffff;
@@ -91,10 +103,12 @@
       text-shadow: none;
     }
 
-    /* 2. DANH SÁCH GAME (CHỮ THUẦN NỔI TRÊN NỀN, KHÔNG KHUNG HỘP) */
+    /* 2. DANH SÁCH GAME */
     #learn-view {
       display: none;
+      align-items: flex-start; /* Canh thẳng hàng mép trái khớp với mũi tên */
       gap: 22px;
+      width: 100%;
     }
 
     .game-item {
@@ -107,13 +121,12 @@
       transition: color 0.15s ease, transform 0.15s ease;
     }
 
-    /* Hover đổi màu đậm nhẹ và hơi trượt nhẹ */
     .game-item:hover {
-      color: #999999; /* Chữ sậm/đậm màu lại nhẹ */
+      color: #999999;
       transform: translateX(8px);
     }
 
-    /* 3. DỮ LIỆU & LIÊN HỆ (CHỮ NỔI ĐƠN GIẢN TRÊN NỀN) */
+    /* 3. DỮ LIỆU & LIÊN HỆ */
     #data-view, #contact-view {
       display: none;
       text-align: center;
@@ -130,9 +143,8 @@
 
     @media (max-width: 768px) {
       #back-btn {
-        top: 20px;
-        left: 20px;
-        font-size: 26px;
+        font-size: 42px;
+        top: -60px;
       }
       .main-btn {
         font-size: 20px;
@@ -150,62 +162,61 @@
 </head>
 <body>
 
-  <!-- MŨI TÊN QUAY LẠI GÓC TRÊN BÊN TRÁI -->
-  <button id="back-btn" onclick="showMain()" title="Quay lại">←</button>
+  <!-- KHUNG BAO TƯƠNG ĐỐI TRUNG TÂM -->
+  <div class="menu-stage">
 
-  <!-- MENU CHÍNH -->
-  <main id="main-view" class="view-container">
-    <button class="main-btn" onclick="openView('learn-view')">HỌC TẬP</button>
-    <button class="main-btn" onclick="openView('data-view')">DỮ LIỆU</button>
-    <button class="main-btn" onclick="openView('contact-view')">LIÊN HỆ</button>
-  </main>
+    <!-- MŨI TÊN NẰM TRONG KHUNG NÀY -->
+    <button id="back-btn" onclick="showMain()" title="Quay lại">←</button>
 
-  <!-- DANH SÁCH GAME TRỰC TIẾP TRÊN NỀN -->
-  <div id="learn-view" class="view-container">
-    <a href="./minigames/quiz.html" class="game-item">Trắc Nghiệm Hán Tự</a>
-    <a href="./minigames/draw.html" class="game-item">Luyện Viết (Quick Draw)</a>
-    <a href="./minigames/fishing.html" class="game-item">Trò Chơi Câu Cá</a>
-    <a href="./minigames/horse_racing.html" class="game-item">Đua Ngựa Chữ Hán</a>
-    <a href="./minigames/exam_cheat.html" class="game-item">Vượt Qua Kỳ Thi</a>
-  </div>
+    <!-- MENU CHÍNH -->
+    <main id="main-view" class="view-container">
+      <button class="main-btn" onclick="openView('learn-view')">HỌC TẬP</button>
+      <button class="main-btn" onclick="openView('data-view')">DỮ LIỆU</button>
+      <button class="main-btn" onclick="openView('contact-view')">LIÊN HỆ</button>
+    </main>
 
-  <!-- THÔNG TIN DỮ LIỆU -->
-  <div id="data-view" class="view-container">
-    <p class="info-text">HỆ THỐNG: HSK 1 - HSK 6</p>
-    <p class="info-text">TỔNG TỪ VỰNG: 5,000+ TỪ</p>
-    <p class="info-text">BỘ THỦ CƠ BẢN: 214 BỘ</p>
-  </div>
+    <!-- DANH SÁCH GAME -->
+    <div id="learn-view" class="view-container">
+      <a href="./minigames/quiz.html" class="game-item">Trắc Nghiệm Hán Tự</a>
+      <a href="./minigames/draw.html" class="game-item">Luyện Viết (Quick Draw)</a>
+      <a href="./minigames/fishing.html" class="game-item">Trò Chơi Câu Cá</a>
+      <a href="./minigames/horse_racing.html" class="game-item">Đua Ngựa Chữ Hán</a>
+      <a href="./minigames/exam_cheat.html" class="game-item">Vượt Qua Kỳ Thi</a>
+    </div>
 
-  <!-- THÔNG TIN LIÊN HỆ -->
-  <div id="contact-view" class="view-container">
-    <p class="info-text">DỰ ÁN: CHINESE TERMINAL</p>
-    <p class="info-text">EMAIL: FU.MOTIVATORS@GMAIL.COM</p>
-    <p class="info-text">GITHUB: GITHUB.COM/MANHBG100</p>
+    <!-- DỮ LIỆU -->
+    <div id="data-view" class="view-container">
+      <p class="info-text">HỆ THỐNG: HSK 1 - HSK 6</p>
+      <p class="info-text">TỔNG TỪ VỰNG: 5,000+ TỪ</p>
+      <p class="info-text">BỘ THỦ CƠ BẢN: 214 BỘ</p>
+    </div>
+
+    <!-- LIÊN HỆ -->
+    <div id="contact-view" class="view-container">
+      <p class="info-text">DỰ ÁN: CHINESE TERMINAL</p>
+      <p class="info-text">EMAIL: FU.MOTIVATORS@GMAIL.COM</p>
+      <p class="info-text">GITHUB: GITHUB.COM/MANHBG100</p>
+    </div>
+
   </div>
 
   <script>
     function openView(viewId) {
-      // Ẩn menu chính
       document.getElementById('main-view').style.display = 'none';
-
-      // Ẩn các view con khác nếu có
       document.getElementById('learn-view').style.display = 'none';
       document.getElementById('data-view').style.display = 'none';
       document.getElementById('contact-view').style.display = 'none';
 
-      // Hiện view được chọn và hiện nút quay lại
       document.getElementById(viewId).style.display = 'flex';
       document.getElementById('back-btn').style.display = 'block';
     }
 
     function showMain() {
-      // Ẩn tất cả view con và nút quay lại
       document.getElementById('learn-view').style.display = 'none';
       document.getElementById('data-view').style.display = 'none';
       document.getElementById('contact-view').style.display = 'none';
       document.getElementById('back-btn').style.display = 'none';
 
-      // Hiện lại menu chính
       document.getElementById('main-view').style.display = 'flex';
     }
   </script>
