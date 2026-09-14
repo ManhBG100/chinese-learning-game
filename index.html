@@ -38,7 +38,7 @@
       position: fixed;
       top: 75px;
       left: 80px;
-      font-size: 52px; /* Gấp đôi cỡ chữ 26px của menu */
+      font-size: 52px;
       color: #ffffff;
       letter-spacing: 4px;
       text-transform: uppercase;
@@ -46,6 +46,29 @@
       z-index: 100;
       pointer-events: none;
       line-height: 1.1;
+      animation: gentle-jolt 3.5s infinite ease-in-out;
+    }
+
+    /* ANIMATION GIẬT THEO NHỊP */
+    @keyframes gentle-jolt {
+      0%, 88%, 100% {
+        transform: translate(0, 0);
+      }
+      90% {
+        transform: translate(-2px, 2px);
+      }
+      92% {
+        transform: translate(3px, -1px);
+      }
+      94% {
+        transform: translate(-2px, -2px);
+      }
+      96% {
+        transform: translate(2px, 1px);
+      }
+      98% {
+        transform: translate(0, 0);
+      }
     }
 
     /* KHUNG TƯƠNG ĐỐI CHỨA CẢ MŨI TÊN VÀ NỘI DUNG */
@@ -59,7 +82,7 @@
       max-width: 90vw;
     }
 
-    /* MŨI TÊN TO, NẰM Ở GÓC TRÊN BÊN TRÁI CỦA KHUNG NỘI DUNG */
+    /* MŨI TÊN TO */
     #back-btn {
       display: none;
       position: absolute;
@@ -161,7 +184,7 @@
       .app-title {
         top: 20px;
         left: 20px;
-        font-size: 36px; /* Co giãn vừa màn hình điện thoại */
+        font-size: 36px;
       }
       #back-btn {
         font-size: 42px;
@@ -186,7 +209,6 @@
   <h1 class="app-title">CHINESE LEARNING SYSTEM</h1>
 
   <div class="menu-stage">
-
     <button id="back-btn" onclick="showMain()" title="Quay lại">←</button>
 
     <main id="main-view" class="view-container">
@@ -214,7 +236,6 @@
       <p class="info-text">EMAIL: FU.MOTIVATORS@GMAIL.COM</p>
       <p class="info-text">GITHUB: GITHUB.COM/MANHBG100</p>
     </div>
-
   </div>
 
   <script>
