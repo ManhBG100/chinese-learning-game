@@ -32,6 +32,19 @@
       align-items: center;
     }
 
+    /* TIÊU ĐỀ CHƯƠNG TRÌNH GÓC TRÊN BÊN TRÁI */
+    .app-title {
+      position: fixed;
+      top: 30px;
+      left: 40px;
+      font-size: 52px; /* Gấp đôi font-size của .main-btn (26px) */
+      color: #ffffff;
+      text-shadow: 4px 4px 0px #000000;
+      letter-spacing: 4px;
+      z-index: 1000;
+      text-transform: uppercase;
+    }
+
     /* KHUNG TƯƠNG ĐỐI CHỨA CẢ MŨI TÊN VÀ NỘI DUNG */
     .menu-stage {
       position: relative;
@@ -142,6 +155,11 @@
     }
 
     @media (max-width: 768px) {
+      .app-title {
+        font-size: 30px;
+        top: 20px;
+        left: 20px;
+      }
       #back-btn {
         font-size: 42px;
         top: -60px;
@@ -162,20 +180,18 @@
 </head>
 <body>
 
-  <!-- KHUNG BAO TƯƠNG ĐỐI TRUNG TÂM -->
+  <div class="app-title">CHINESE SYSTEM</div>
+
   <div class="menu-stage">
 
-    <!-- MŨI TÊN NẰM TRONG KHUNG NÀY -->
     <button id="back-btn" onclick="showMain()" title="Quay lại">←</button>
 
-    <!-- MENU CHÍNH -->
     <main id="main-view" class="view-container">
       <button class="main-btn" onclick="openView('learn-view')">HỌC TẬP</button>
       <button class="main-btn" onclick="openView('data-view')">DỮ LIỆU</button>
       <button class="main-btn" onclick="openView('contact-view')">LIÊN HỆ</button>
     </main>
 
-    <!-- DANH SÁCH GAME -->
     <div id="learn-view" class="view-container">
       <a href="./minigames/quiz.html" class="game-item">Trắc Nghiệm Hán Tự</a>
       <a href="./minigames/draw.html" class="game-item">Luyện Viết (Quick Draw)</a>
@@ -184,14 +200,12 @@
       <a href="./minigames/exam_cheat.html" class="game-item">Vượt Qua Kỳ Thi</a>
     </div>
 
-    <!-- DỮ LIỆU -->
     <div id="data-view" class="view-container">
       <p class="info-text">HỆ THỐNG: HSK 1 - HSK 6</p>
       <p class="info-text">TỔNG TỪ VỰNG: 5,000+ TỪ</p>
       <p class="info-text">BỘ THỦ CƠ BẢN: 214 BỘ</p>
     </div>
 
-    <!-- LIÊN HỆ -->
     <div id="contact-view" class="view-container">
       <p class="info-text">DỰ ÁN: CHINESE TERMINAL</p>
       <p class="info-text">EMAIL: FU.MOTIVATORS@GMAIL.COM</p>
