@@ -30,19 +30,22 @@
       display: flex;
       justify-content: center;
       align-items: center;
+      position: relative;
     }
 
-    /* TIÊU ĐỀ CHƯƠNG TRÌNH GÓC TRÊN BÊN TRÁI */
+    /* TIÊU ĐỀ GÓC TRÊN BÊN TRÁI */
     .app-title {
       position: fixed;
-      top: 30px;
+      top: 36px;
       left: 40px;
-      font-size: 52px; /* Gấp đôi font-size của .main-btn (26px) */
+      font-size: 52px; /* Gấp đôi cỡ chữ 26px của menu */
       color: #ffffff;
-      text-shadow: 4px 4px 0px #000000;
       letter-spacing: 4px;
-      z-index: 1000;
       text-transform: uppercase;
+      text-shadow: 4px 4px 0px #000000;
+      z-index: 100;
+      pointer-events: none;
+      line-height: 1.1;
     }
 
     /* KHUNG TƯƠNG ĐỐI CHỨA CẢ MŨI TÊN VÀ NỘI DUNG */
@@ -58,15 +61,15 @@
 
     /* MŨI TÊN TO, NẰM Ở GÓC TRÊN BÊN TRÁI CỦA KHUNG NỘI DUNG */
     #back-btn {
-      display: none; /* Mặc định ẩn, chỉ hiện khi vào menu con */
+      display: none;
       position: absolute;
-      top: -75px;    /* Đẩy lên phía trên cụm danh sách */
-      left: 0;       /* Canh thẳng hàng với mép trái của khung */
+      top: -75px;
+      left: 0;
       background: none;
       border: none;
       outline: none;
       color: #ffffff;
-      font-size: 54px; /* Mũi tên to rõ */
+      font-size: 54px;
       font-weight: 900;
       line-height: 1;
       cursor: pointer;
@@ -77,7 +80,7 @@
 
     #back-btn:hover {
       color: #888888;
-      transform: translateX(-8px); /* Trượt nhẹ sang trái khi hover */
+      transform: translateX(-8px);
     }
 
     /* KHUNG CHỨA CÁC MÀN HÌNH CHỮ */
@@ -119,7 +122,7 @@
     /* 2. DANH SÁCH GAME */
     #learn-view {
       display: none;
-      align-items: flex-start; /* Canh thẳng hàng mép trái khớp với mũi tên */
+      align-items: flex-start;
       gap: 22px;
       width: 100%;
     }
@@ -156,9 +159,9 @@
 
     @media (max-width: 768px) {
       .app-title {
-        font-size: 30px;
         top: 20px;
         left: 20px;
+        font-size: 36px; /* Co giãn vừa màn hình điện thoại */
       }
       #back-btn {
         font-size: 42px;
@@ -180,7 +183,7 @@
 </head>
 <body>
 
-  <div class="app-title">CHINESE SYSTEM</div>
+  <h1 class="app-title">CHINESE LEARNING SYSTEM</h1>
 
   <div class="menu-stage">
 
@@ -208,7 +211,7 @@
 
     <div id="contact-view" class="view-container">
       <p class="info-text">DỰ ÁN: CHINESE TERMINAL</p>
-      <p class="info-text">EMAIL: FU.7anhta@GMAIL.COM</p>
+      <p class="info-text">EMAIL: FU.MOTIVATORS@GMAIL.COM</p>
       <p class="info-text">GITHUB: GITHUB.COM/MANHBG100</p>
     </div>
 
